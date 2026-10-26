@@ -1,0 +1,22 @@
+{
+  "name": "reasoning-atlas",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "build": "python scripts/build_web.py",
+    "start": "python -m services.atlas.server",
+    "test": "python -m unittest discover -s tests -v"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.4"
+  }
+}

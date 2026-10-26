@@ -1,0 +1,17 @@
+{
+  "status": "verified",
+  "originalFilename": "Neonkaart voor Kunstmatige Intelligentie.png",
+  "expectedPath": "assets/reference/reasoning-atlas-windows-mockup.png",
+  "sourceConversation": "6ad6860d-46c0-83ed-b5ce-86ba1a3328e1",
+  "sourcePath": "C:/Users/djedd/Downloads/Neonkaart voor Kunstmatige Intelligentie.png",
+  "earlierUnretrievedPath": "/mnt/data/ghostwriter_images/generated/wide_cinematic_photorealistic_computer_ui_render_1.png",
+  "sha256": "f9035bc07a05908e52b4884a0521f4450efe7ed5b9c3f345f9d57796f4fb86f7",
+  "gitBlobSha": "951d6bcef896b8678cd00f0b3404c68a1808f425",
+  "sizeBytes": 2026651,
+  "width": 1672,
+  "height": 941,
+  "inspected": true,
+  "receivedDate": "2026-10-20",
+  "authority": "Owner-supplied attachment in the current conversation",
+  "note": "Copied unchanged; English repository filename. Identity with the inaccessible earlier generated file is not independently verified."
+}

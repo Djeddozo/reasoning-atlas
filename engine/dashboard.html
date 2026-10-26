@@ -1,0 +1,2032 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas</title>
+<style>
+:root{
+  --bg:#f6f5f2; --surface:#ffffff; --ink:#1c1c1a; --muted:#77756f; --line:#e7e5df;
+  --accent:#2f5d50; --accent-soft:#e6efeb; --warn:#a34a28; --warn-soft:#f6e9e2; --chip:#f0eee9;
+  --ok:#2f6b4f; --ok-soft:#e3f0e8; --bad:#b03a3a; --bad-soft:#f8e4e4; --wait:#9a6a12; --wait-soft:#f7edd5;
+  --c-today:#2f5d50; --c-plan:#3d5a8a; --c-brain:#7a4e8c; --c-system:#8a5a2b; --c-build:#2d6e7e; --c-forge:#b5532a; --c-research:#4a5fa8; --on-accent:#ffffff;
+  --st-live:#2f6b4f; --st-install:#5f9c7e; --st-review:#a3cbb6; --st-building:#3d5a8a; --st-todo:#d6d3cb; --st-blocked:#c9962e; --st-proposed:#e8e5de; --st-dropped:#eeece7;
+  --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.04);
+}
+/* status colours: ok = green, wait = amber, bad = red; one accent per tab (set on body[data-tab]) */
+@media (prefers-color-scheme: dark){ :root:not([data-theme=light]){
+  --bg:#151514; --surface:#1e1e1c; --ink:#ecebe7; --muted:#9a988f; --line:#2c2b29;
+  --accent:#8cc4ae; --accent-soft:#22302b; --warn:#e39a78; --warn-soft:#33241d; --chip:#272624;
+  --ok:#8cc4ae; --ok-soft:#22302b; --bad:#e58a8a; --bad-soft:#3a2323; --wait:#e3c27c; --wait-soft:#352e1c;
+  --c-today:#8cc4ae; --c-plan:#9db8e6; --c-brain:#cfa6e0; --c-system:#e3b07c; --c-build:#86c7d6; --c-forge:#ee9a6c; --c-research:#a7b6ee; --on-accent:#151514;
+  --st-live:#8cc4ae; --st-install:#5b977f; --st-review:#3b6656; --st-building:#9db8e6; --st-todo:#45433f; --st-blocked:#d9b260; --st-proposed:#34332f; --st-dropped:#2a2927; } }
+:root[data-theme=dark]{
+  --bg:#151514; --surface:#1e1e1c; --ink:#ecebe7; --muted:#9a988f; --line:#2c2b29;
+  --accent:#8cc4ae; --accent-soft:#22302b; --warn:#e39a78; --warn-soft:#33241d; --chip:#272624;
+  --ok:#8cc4ae; --ok-soft:#22302b; --bad:#e58a8a; --bad-soft:#3a2323; --wait:#e3c27c; --wait-soft:#352e1c;
+  --c-today:#8cc4ae; --c-plan:#9db8e6; --c-brain:#cfa6e0; --c-system:#e3b07c; --c-build:#86c7d6; --c-forge:#ee9a6c; --c-research:#a7b6ee; --on-accent:#151514;
+  --st-live:#8cc4ae; --st-install:#5b977f; --st-review:#3b6656; --st-building:#9db8e6; --st-todo:#45433f; --st-blocked:#d9b260; --st-proposed:#34332f; --st-dropped:#2a2927; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 80px}
+header{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+header #hdr{margin-left:auto}
+#verBtn{white-space:nowrap}
+
+h1{font-size:22px;letter-spacing:-.01em;margin:0}
+.sub{color:var(--muted);font-size:13px}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;gap:4px;overflow-x:auto;padding:10px 0 12px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+nav button{border:0;background:none;color:var(--muted);font:inherit;font-weight:500;padding:11px 16px;min-height:44px;border-radius:999px;cursor:pointer;white-space:nowrap}
+nav button.on{background:var(--tab,var(--ink));color:var(--on-accent)}
+nav .t-today{--tab:var(--c-today)} nav .t-forge{--tab:var(--c-forge)} nav .t-research{--tab:var(--c-research)} nav .t-system{--tab:var(--c-system)}
+nav .count{font-size:11px;opacity:.7;margin-left:4px}
+body[data-tab=today]{--accent:var(--c-today)} body[data-tab=plan]{--accent:var(--c-plan)}
+body[data-tab=forge]{--accent:var(--c-forge)} body[data-tab=research]{--accent:var(--c-research)} body[data-tab=system]{--accent:var(--c-system)}
+body[data-stage=brain]{--accent:var(--c-brain)} body[data-stage=plan]{--accent:var(--c-plan)} body[data-stage=build]{--accent:var(--c-build)}
+body[data-tab]{--accent-soft:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+.s-ok{color:var(--ok);background:var(--ok-soft)} .s-wait{color:var(--wait);background:var(--wait-soft)} .s-bad{color:var(--bad);background:var(--bad-soft)}
+.tag.s-ok,.tag.s-wait,.tag.s-bad{text-transform:none;letter-spacing:0}
+#themeBtn{min-width:42px;padding:10px}
+section{display:none} section.on{display:block}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 10px;font-weight:600}
+.row{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0;padding-top:2px}
+.grow{flex:1;min-width:0}
+.title{font-weight:500}
+.meta{color:var(--muted);font-size:13px;margin-top:2px}
+.meta a{color:inherit}
+.btns{display:flex;gap:6px;flex-shrink:0}
+.b{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:14px;padding:10px 16px;min-height:42px;border-radius:12px;cursor:pointer}
+.b:hover{border-color:var(--muted)}
+.b.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.empty{color:var(--muted);font-size:14px;padding:4px 0}
+.dump textarea{width:100%;min-height:84px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;background:var(--bg);color:var(--ink)}
+.dump textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+.dump .bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:8px;gap:8px}
+.dump .bar .sub{flex:1 1 220px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:0;background:var(--chip);color:var(--ink);font:inherit;font-size:14px;padding:9px 14px;min-height:38px;border-radius:999px;cursor:pointer}
+.chip.on{background:var(--accent);color:var(--on-accent)}
+.dlv{display:flex;gap:2px;height:14px;margin:4px 0 10px;border-radius:7px;overflow:hidden}
+.dlv button{border:0;padding:0;min-width:6px;cursor:pointer;background:var(--c)}
+.dlv button:hover,.dlv button:focus-visible{filter:brightness(1.12);outline:2px solid var(--ink);outline-offset:-2px}
+.dlvlegend{display:flex;flex-wrap:wrap;gap:4px 6px;margin-bottom:10px}
+.dlvlegend button{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;padding:5px 10px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.dlvlegend button.on{border-color:var(--ink);background:var(--chip)}
+#fGoal{max-width:100%;min-width:0}
+.dlvlegend button.zero{color:var(--muted)}
+.dlvlegend b{font-variant-numeric:tabular-nums}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--c);flex:none}
+.stage{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);margin-right:6px}
+.dlvsum{font-size:14px;margin:2px 0 0}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;background:var(--chip);color:var(--muted);margin-right:6px;text-transform:uppercase;letter-spacing:.04em}
+.tag.match{background:var(--accent-soft);color:var(--accent);text-transform:none;letter-spacing:0}
+.alert{background:var(--warn-soft);border-color:transparent}
+.alert h2{color:var(--warn)}
+.phase{margin-bottom:14px}
+.phase .top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
+.track{height:6px;background:var(--chip);border-radius:999px;overflow:hidden}
+.fill{height:100%;background:var(--accent);border-radius:999px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.res{background:var(--bg);border-radius:10px;padding:10px 12px}
+.res .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.star{color:var(--accent)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);max-width:min(560px,calc(100vw - 32px));text-align:center;background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+/* optimistic UI: an item leaves at once; Undo for a few seconds; restored if the server refuses */
+.row.leaving{opacity:0;transform:translateX(14px);transition:opacity .22s ease,transform .22s ease;pointer-events:none}
+.row.pending{opacity:.6}
+.undo{position:fixed;bottom:18px;left:50%;transform:translate(-50%,8px);display:flex;gap:12px;align-items:center;max-width:min(560px,calc(100vw - 32px));
+  background:var(--ink);color:var(--bg);padding:8px 8px 8px 14px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:60}
+.undo.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.undo button{background:transparent;color:inherit;border:1px solid currentColor;border-radius:8px;padding:4px 10px;font:inherit;cursor:pointer}
+@media (prefers-reduced-motion: reduce){.row.leaving,.undo{transition:none}}
+.done .title{text-decoration:line-through;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.tile .k{font-size:12px;color:var(--muted)}
+.tile .v{font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.2;font-variant-numeric:tabular-nums}
+.tile .d{font-size:12px;color:var(--muted)}
+.bars{position:relative;display:flex;align-items:flex-end;gap:2px;height:120px;border-bottom:1px solid var(--line)}
+.bars .col{flex:1;height:100%;display:flex;align-items:flex-end;cursor:default}
+.bars .bar{width:100%;background:var(--accent);border-radius:4px 4px 0 0;min-height:0}
+.bars .col.today .bar{outline:2px solid var(--accent-soft)}
+.bars .col:hover .bar{opacity:.75}
+.axis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:4px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%);display:none}
+.review{white-space:pre-wrap;font-size:14px}
+.slider{margin:12px 0 4px} .slider input{width:100%;accent-color:var(--accent)}
+.ticks{position:relative;height:18px;font-size:12px;color:var(--muted);margin:2px 8px 0}
+.ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.ticks span:nth-child(1){left:0;transform:translateX(-8px)} .ticks span:nth-child(2){left:33.33%}
+.ticks span:nth-child(3){left:66.67%} .ticks span:nth-child(4){left:100%;transform:translateX(calc(-100% + 8px))}
+.msg{padding:8px 12px;border-radius:12px;margin:6px 0;font-size:14px;white-space:pre-wrap;max-width:88%}
+.msg.me{background:var(--accent-soft);margin-left:auto} .msg.claude{background:var(--bg);border:1px solid var(--line)}
+#chatLog{max-height:300px;overflow:auto;margin-bottom:8px}
+.b.danger{background:var(--warn);border-color:var(--warn);color:var(--surface);font-weight:600}
+.state{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--chip);color:var(--muted)}
+.state.on{background:var(--accent-soft);color:var(--accent)} .state.bad{background:var(--warn-soft);color:var(--warn)}
+.lanes{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;margin-bottom:4px}
+.lane{flex:0 0 auto;max-width:230px;text-align:left;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:7px 10px;cursor:pointer;font:inherit;font-size:13px}
+.lane.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.lane .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .lane .sub{display:block;font-size:11px}
+.lane i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--muted)}
+.lane.running i{background:var(--ok);animation:pulse 1.6s infinite} .lane.conflict i{background:var(--warn)} .lane.pr i{background:var(--wait)}
+.lane .pbar{height:3px;background:var(--chip);border-radius:2px;margin-top:5px} .lane .pbar b{display:block;height:100%;background:var(--ok);border-radius:2px}
+@keyframes pulse{50%{opacity:.35}}
+.goal{border-left:2px solid var(--line);padding:2px 0 4px 12px;margin:10px 0 4px}
+.goal.d0{border-left-color:var(--accent)}
+.goal summary{list-style:none;cursor:pointer} .goal summary::-webkit-details-marker{display:none}
+.goal .head{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.goal .head .title::before{content:"▸ ";color:var(--muted)} .goal[open]>summary .head .title::before{content:"▾ "}
+.goal .t{display:flex;gap:8px;align-items:flex-start;padding:4px 0;font-size:14px}
+.goal .t .mk{color:var(--muted);width:14px;flex-shrink:0;text-align:center}
+.mini{font:inherit;font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:2px 4px;max-width:180px}
+pre.log{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word;max-height:340px;overflow:auto;margin:8px 0 0}
+.bar2{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+table.data{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px} table.data td,table.data th{text-align:left;padding:3px 6px;border-top:1px solid var(--line)}
+.tiles.three{grid-template-columns:repeat(3,1fr)}
+@media (max-width:560px){ .tiles{grid-template-columns:repeat(2,1fr)} .tiles.three{grid-template-columns:1fr} .phase .top{flex-direction:column;gap:2px} }
+@media (max-width:560px){ .row{flex-wrap:wrap} .row .btns{width:100%;justify-content:flex-end} .dump .btns{margin-left:auto} }
+.treewrap{overflow-x:auto;margin:8px -4px 0;padding:0 4px;-webkit-overflow-scrolling:touch}
+.tree text{font-size:11px;fill:var(--ink)} .tree .lane{font-size:10px;fill:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.tree .band{fill:var(--bg)} .tree .edge{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:3 4;opacity:.6} .tree .edge.on{stroke:var(--accent);stroke-dasharray:none;stroke-width:1.8;opacity:.8}
+.tree .edge.done{stroke:var(--accent);stroke-dasharray:none;opacity:.22}
+.tree .node{cursor:pointer} .tree .node:hover circle.c{stroke-width:3}
+.tree .unlocked circle.c{fill:var(--accent);stroke:var(--accent)} .tree .unlocked .g{fill:var(--surface)}
+.tree .building circle.c{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5} .tree .arc{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round}
+.tree .available circle.c{fill:var(--surface);stroke:var(--accent);stroke-width:2;stroke-dasharray:4 3}
+.tree .available .halo{fill:var(--accent);opacity:.12;animation:pulse 2.4s ease-in-out infinite}
+.tree .locked circle.c{fill:var(--chip);stroke:var(--line)} .tree .locked text{fill:var(--muted)} .tree .g{fill:var(--muted);font-size:12px}
+.tree .building .g,.tree .available .g{fill:var(--accent)}
+.tree .seed{fill:var(--surface);stroke:var(--muted);stroke-dasharray:2 2} .tree .sel circle.c{stroke:var(--ink);stroke-width:3}
+.tree .nextmark{fill:var(--warn);font-size:13px}
+@keyframes pulse{0%,100%{opacity:.06}50%{opacity:.22}}
+@media (prefers-reduced-motion: reduce){ .tree .available .halo{animation:none} }
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.seg{display:inline-flex;background:var(--chip);border-radius:999px;padding:2px}
+.seg button{border:0;background:none;font:inherit;font-size:13px;color:var(--muted);padding:4px 11px;border-radius:999px;cursor:pointer}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.panel{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.ed{border:0;background:none;color:var(--muted);cursor:pointer;font:inherit;font-size:13px;padding:2px 6px;border-radius:6px} .ed:hover{background:var(--chip);color:var(--ink)}
+dialog{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);color:var(--ink);padding:18px;width:min(520px,calc(100vw - 32px));max-height:calc(100vh - 40px)}
+dialog::backdrop{background:rgba(0,0,0,.35)}
+.form label{display:block;font-size:12px;color:var(--muted);margin:10px 0 3px}
+.form input,.form select,.form textarea{width:100%;font:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)}
+.form textarea{min-height:80px;resize:vertical} .form .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+/* ---- page structure: one layout per kind of page ---- */
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+nav button{display:inline-flex;align-items:center;gap:7px}
+nav button .ico{width:17px;height:17px}
+.phead{display:flex;align-items:center;gap:12px;margin:4px 0 16px;flex-wrap:wrap}
+.phead>div:not(.seg){flex:1 1 260px;min-width:0}
+.picon{width:42px;height:42px;border-radius:13px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.picon .ico{width:22px;height:22px}
+h2.ptitle{font-size:20px;text-transform:none;letter-spacing:-.01em;color:var(--ink);margin:0;font-weight:600}
+.phead .sub{margin:2px 0 0}
+.pviews{flex:none}
+.pviews button{padding:7px 14px;font-size:14px}
+.chead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.chead h2{margin:0}
+.count{display:inline-block;min-width:20px;padding:0 6px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:600;text-align:center;margin-left:4px}
+.count:empty{display:none}
+.cols{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;align-items:start}
+.l-notebook .cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:820px){ .cols,.l-notebook .cols{grid-template-columns:minmax(0,1fr)} }
+/* Today: a glance row of live status tiles */
+.glance{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.gl{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;font:inherit;color:var(--ink);cursor:pointer;min-width:0}
+.gl:hover{border-color:var(--muted)}
+.gl .ico{color:var(--muted);margin-top:2px}
+.gl .k{font-size:12px;color:var(--muted)} .gl .v{font-size:22px;font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums}
+.gl .d{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.gl.hot{border-color:var(--warn);background:var(--warn-soft)} .gl.hot .ico{color:var(--warn)}
+.gl.live{border-color:var(--c-plan)} .gl.live .ico{color:var(--c-plan)}
+.gl .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:6px;animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.3}}
+@media (max-width:820px){ .glance{grid-template-columns:repeat(2,minmax(0,1fr))} }
+details.inbox{border-top:1px solid var(--line);padding:8px 0}
+details.inbox:first-of-type{border-top:0}
+details.inbox>summary{cursor:pointer;font-weight:500}
+/* Plan: compact toolbar, rarely used filters folded away */
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
+.toolbar input[type=search]{flex:1 1 220px;min-width:0;font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.toolbar .mini{font-size:13px;padding:6px 8px;max-width:100%}
+details.morefilters{margin-bottom:6px} details.morefilters>summary{cursor:pointer;font-size:13px;color:var(--muted)}
+/* Build: pipeline and a live console like a terminal */
+.pipe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.step{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;text-align:left;font:inherit;color:var(--ink);cursor:pointer;min-width:0}
+.step:hover{border-color:var(--muted)}
+.step:not(:last-child)::after{content:"›";position:absolute;right:-9px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px;z-index:1;background:var(--bg);line-height:1;padding:0 1px}
+.step .k{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px} .step .k .ico{width:15px;height:15px}
+.step .n{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.step .d{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.step.warn{border-color:var(--warn)}
+@media (max-width:820px){ .pipe{grid-template-columns:repeat(2,minmax(0,1fr))} .step:nth-child(2)::after{display:none} }
+.console{background:#141714;color:#d6e0d9;border-radius:12px;padding:10px 12px;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;max-height:520px;min-height:120px;overflow:auto;margin-top:10px}
+.cl{display:grid;grid-template-columns:42px minmax(0,1fr);gap:8px;padding:3px 0}
+.cl .ct{color:#6d7a72}
+.cl .cx{min-width:0;word-break:break-word}
+.cl.say .cx{font:13.5px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;color:#f1f5f2}
+.cl.tool .cx code{color:#b9c6be;font:inherit}
+.tk{display:inline-block;padding:0 7px;border-radius:5px;margin-right:7px;font-size:11px;font-weight:600;background:#25302a;color:#8cc4ae}
+.tk.edit{background:#3a321c;color:#e3c27c} .tk.run{background:#1f2a3c;color:#9db8e6} .tk.read{background:#2a2a28;color:#b5b3ab}
+.cl.sys .cx{color:#8a978f;font-style:italic}
+.cl.done .cx{color:#8cc4ae;font-weight:600}
+.cl.err .cx{color:#e58a8a}
+.nowline{display:flex;align-items:center;gap:10px;background:var(--accent-soft);border-radius:10px;padding:8px 12px;margin-top:8px;font-size:14px}
+.nowline .spin{width:14px;height:14px;border-radius:50%;border:2px solid var(--accent);border-right-color:transparent;animation:spin 1s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){ .nowline .spin,.gl .dot{animation:none} }
+.runmeta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin-top:6px}
+.runbar{height:6px;background:var(--chip);border-radius:999px;overflow:hidden;margin-top:8px} .runbar b{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .6s}
+/* System: settings with a side menu */
+.settings{display:grid;grid-template-columns:210px minmax(0,1fr);gap:16px;align-items:start}
+.snav{display:flex;flex-direction:column;gap:2px;position:sticky;top:76px}
+.snav button{display:flex;align-items:center;gap:10px;border:0;background:none;font:inherit;font-size:14px;color:var(--ink);padding:9px 12px;border-radius:10px;cursor:pointer;text-align:left}
+.snav button .ico{width:18px;height:18px;color:var(--muted)}
+.snav button .st{margin-left:auto;font-size:11px;color:var(--muted)}
+.snav button .st.bad{color:var(--warn);font-weight:600}
+.snav button:hover{background:var(--chip)}
+.snav button.on{background:var(--surface);box-shadow:var(--shadow);border:1px solid var(--line);font-weight:600} .snav button.on .ico{color:var(--accent)}
+@media (max-width:820px){ .settings{grid-template-columns:minmax(0,1fr)} .snav{flex-direction:row;overflow-x:auto;position:static;padding-bottom:4px} .snav button{white-space:nowrap;flex:none} .snav button .st{display:none} }
+.newbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--accent-soft);border-radius:12px;padding:8px 8px 8px 14px;margin-bottom:12px;font-size:14px}
+.newbar .b{min-height:34px;padding:6px 12px}
+.dump .btns{flex-wrap:wrap;flex-shrink:1;max-width:100%;justify-content:flex-end}
+#recommended .row{flex-wrap:wrap} #recommended .row .btns{width:100%;justify-content:flex-start}
+@media (max-width:560px){
+  nav{gap:0;justify-content:space-between;overflow-x:visible}
+  nav button{flex-direction:column;gap:2px;padding:6px 4px;min-width:0;flex:1 1 0;font-size:12px;border-radius:12px;position:relative}
+  nav button .ico{width:20px;height:20px}
+  nav .count{position:absolute;top:2px;right:8%;margin:0;font-size:10px;min-width:16px;padding:0 4px}
+  .phead .pviews{width:100%;overflow-x:auto} .phead .pviews button{flex:1 0 auto}
+}
+.cmdcard{border-left:4px solid var(--warn)}
+.intrcard{border-left:4px solid var(--bad);background:linear-gradient(90deg,var(--bad-soft),var(--surface) 60%)}
+.intrcard .cmd{padding:12px 0;border-top:1px solid var(--line)} .intrcard .cmd:first-child{border-top:0;padding-top:0}
+.intrcard .tool{display:inline-block;font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--bad-soft);color:var(--bad);margin-right:6px}
+.intrcard dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:3px 10px;margin:8px 0;font-size:13.5px}
+.intrcard dt{color:var(--muted)} .intrcard dd{margin:0;word-break:break-word}
+.cmdcard .cmd{padding:10px 0;border-top:1px solid var(--line)} .cmdcard .cmd:first-child{border-top:0;padding-top:0}
+pre.cmdline{background:#141714;color:#d6e0d9;border-radius:10px;padding:10px 12px;margin:8px 0;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-all;user-select:all}
+pre.cmdline .c{color:#7d8b83}
+.cmdcard code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:13px}
+/* header: help as a small icon (a dot when there is something new); Update only when one is ready */
+.iconbtn{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 16px/1 inherit;cursor:pointer;flex:none}
+.iconbtn:hover{border-color:var(--muted)}
+.iconbtn.dot::after{content:"";position:absolute;top:1px;right:1px;width:10px;height:10px;border-radius:50%;background:var(--warn);border:2px solid var(--bg)}
+.b.upd{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600;min-height:38px;padding:6px 12px}
+header{align-items:center} header #hdr{flex:1}
+.gsearch{position:relative;flex:0 1 240px;min-width:0} .gsearch input{width:100%;font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+#gResults{position:absolute;right:0;top:100%;margin-top:4px;min-width:100%;width:max-content;max-width:min(360px,90vw);z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.15);overflow:hidden}
+#gResults div{padding:8px 12px;cursor:pointer;font-size:14px} #gResults div.on,#gResults div:hover{background:var(--accent-soft)} #gResults small{color:var(--muted);margin-left:8px}
+.gs-miss{opacity:.35} mark.gs{background:var(--accent-soft);color:inherit;border-radius:3px;padding:0 1px}
+@media(max-width:700px){.gsearch{flex-basis:130px}}
+/* the flow Ideas → Plan → Build, on each of those pages */
+.flow{display:flex;align-items:stretch;gap:6px;margin:-4px 0 16px;flex-wrap:nowrap}
+.flow .arrow{align-self:center;color:var(--muted);font-size:18px}
+.fstep{flex:1 1 0;min-width:0;display:flex;gap:8px;align-items:center;text-align:left;border:1px dashed var(--line);background:transparent;border-radius:12px;padding:7px 10px;font:inherit;color:var(--muted);cursor:pointer}
+.fstep .ico{width:18px;height:18px;flex:none}
+.fstep b{color:var(--ink);font-weight:600} .fstep .n{font-variant-numeric:tabular-nums;margin-left:2px}
+.fstep .d{display:block;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fstep.on{border-style:solid;border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+@media (max-width:560px){ .fstep .d{display:none} .fstep{padding:6px 8px} }
+/* Ideas: cards, each with where it fits */
+.l-ideas .cols{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
+@media (max-width:820px){ .l-ideas .cols{grid-template-columns:minmax(0,1fr)} }
+.ideagrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.idea{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow);border-top:4px solid var(--c-brain)}
+.idea .itop{display:flex;justify-content:space-between;align-items:center}
+.idea .title{font-weight:600;font-size:15.5px;line-height:1.35}
+.idea .desc{font-size:13.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.fit{display:flex;gap:8px;align-items:flex-start;background:var(--accent-soft);border-radius:10px;padding:8px 10px;font-size:13px}
+.fit .ico{width:16px;height:16px;color:var(--accent);margin-top:2px}
+.fit .why{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.fit .by{margin-left:auto;font-size:11px;color:var(--accent);white-space:nowrap}
+.fit.new{background:var(--wait-soft)} .fit.new .ico,.fit.new .by{color:var(--wait)}
+.idea .btns .mini{max-width:140px}
+/* Plan: the master plan, goals as cards */
+.mission{background:linear-gradient(135deg,var(--accent-soft),var(--surface));border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:14px}
+.mission .k{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.mission .k .ico{width:16px;height:16px}
+.mission p{font-size:17px;line-height:1.45;margin:6px 0 4px;font-weight:500}
+.goalgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;align-items:start}
+@media (max-width:560px){ .goalgrid{grid-template-columns:minmax(0,1fr)} }
+.goalcard{margin:0;border-top:4px solid var(--accent)}
+.goalcard>.goal{border-left:0;padding-left:0;margin:0}
+.fitchip{display:inline-flex;align-items:center;gap:6px;margin-top:8px;border:1px dashed var(--c-brain);color:var(--c-brain);background:transparent;border-radius:999px;padding:4px 10px;font:inherit;font-size:12.5px;cursor:pointer}
+.fitchip .ico{width:14px;height:14px}
+/* Today: the focus list is numbered, not another list of bars */
+.focusrow{align-items:flex-start} .focusrow .nr{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:14px;margin-top:2px}
+/* System → Constitution */
+.cgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:820px){ .cgrid{grid-template-columns:minmax(0,1fr)} }
+.cblock{border-radius:12px;padding:10px 12px;background:var(--bg)} .cblock h3{margin:0 0 6px;font-size:13px}
+.cblock ul{margin:0;padding-left:18px;font-size:13.5px} .cblock li{margin:3px 0}
+.cblock.ok h3{color:var(--ok)} .cblock.wait h3{color:var(--wait)} .cblock.bad h3{color:var(--bad)}
+/* phones: the five areas as a bottom bar, within thumb reach */
+@media (max-width:560px){
+  nav{position:fixed;top:auto;bottom:0;left:0;right:0;margin:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));border-top:1px solid var(--line);border-bottom:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);z-index:20}
+  .wrap{padding-bottom:110px}
+  header{margin-bottom:10px;flex-wrap:nowrap} header #hdr{order:0;width:auto;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .phead{margin-bottom:12px} .picon{width:36px;height:36px} h2.ptitle{font-size:18px} .phead .sub{display:none}
+  .toast,.undo{bottom:84px}
+  dialog#tourDialog{bottom:78px}
+}
+/* Forge: one header for its three stages; the stage strip is the navigation between them */
+.forgehead{margin-bottom:6px}
+.forgehead .picon{background:color-mix(in srgb,var(--c-forge) 16%,var(--surface));color:var(--c-forge)}
+.forgehead .phead{margin-bottom:10px}
+.flow.big{margin:0 0 18px}
+.flow.big .fstep{padding:10px 12px;border-width:1.5px}
+.flow.big .fstep b{font-size:15px}
+.flow.big .arrow{color:var(--c-forge);font-weight:700}
+.flow.big .fstep.on{box-shadow:0 0 0 3px color-mix(in srgb,var(--c-forge) 18%,transparent)}
+body[data-tab=forge] section>.phead .picon{width:34px;height:34px;border-radius:10px}
+body[data-tab=forge] section>.phead h2.ptitle{font-size:17px}
+.tag.proj{background:color-mix(in srgb,var(--c-forge) 15%,var(--surface));color:var(--c-forge);text-transform:none;letter-spacing:0;font-weight:600}
+/* Research: findings, each saying why it matters */
+.finding{border-top:1px solid var(--line);padding:12px 0;display:flex;flex-direction:column;gap:5px}
+.finding,.finding *{overflow-wrap:anywhere;min-width:0}
+.finding:first-child{border-top:0;padding-top:2px}
+.finding .ftop{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.finding .title{font-weight:600;color:var(--ink);text-decoration:none;line-height:1.35}
+.finding .title:hover{text-decoration:underline}
+.finding .desc{font-size:13.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.finding .why{font-size:13.5px}
+.imp{font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--chip);color:var(--muted)}
+.imp.high{background:color-mix(in srgb,var(--c-research) 16%,var(--surface));color:var(--c-research)}
+.imp.medium{background:var(--wait-soft);color:var(--wait)}
+.finding.high{border-left:3px solid var(--c-research);padding-left:10px;margin-left:-13px}
+textarea.deepq{width:100%;min-height:80px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;background:var(--bg);color:var(--ink)}
+.card.note .title{font-weight:600;margin:4px 0} .card.note p{margin:6px 0;font-size:14px} .card.note ol{margin:6px 0;padding-left:20px;font-size:14px}
+.checks{display:flex;flex-wrap:wrap;gap:6px 14px} label.check{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink);margin:0}
+label.check input{width:auto}
+a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Atlas</h1>
+    <span class="sub" id="hdr"></span>
+    <div class="gsearch"><input id="gSearch" type="search" placeholder="Search Atlas" aria-label="Search Atlas" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="gResults" oninput="gsInput()" onkeydown="gsKey(event)" onblur="setTimeout(gsClose,150)"><div id="gResults" role="listbox" hidden></div></div>
+    <button class="b upd" id="verBtn" onclick="setTab('system','updates');openUpdates()" title="An update is ready to install" hidden>Update</button>
+    <button class="iconbtn" id="helpBtn" onclick="openHelp()" title="Help and walkthroughs" aria-label="Help and walkthroughs">?</button>
+  </header>
+  <nav id="nav"></nav>
+  <dialog id="taskDetailDialog" style="max-width:700px;width:calc(100% - 48px);max-height:85vh;overflow:auto;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:24px">
+    <button class="b" style="float:right" onclick="$('taskDetailDialog').close()">Close</button><p class="sub">Atlas · Build briefing</p><h2 id="taskDetailTitle"></h2><div id="taskDetailBody"></div>
+  </dialog>
+  <dialog id="helpDialog" style="max-width:540px;width:calc(100% - 48px);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px">
+    <h2>Help & walkthroughs</h2><div id="helpList"></div><p><button class="b" onclick="$('helpDialog').close()">Close</button></p>
+  </dialog>
+  <dialog id="tourDialog" style="position:fixed;top:auto;bottom:12px;margin:12px auto;max-width:540px;width:calc(100% - 48px);background:var(--surface);color:var(--ink);border:2px solid var(--accent);border-radius:16px">
+    <h2 id="tourTitle"></h2><p id="tourText"></p><div class="btns"><button class="b" id="tourBack" onclick="tourStep(-1)">Back</button><button class="b primary" id="tourNext" onclick="tourStep(1)">Next</button><button class="b" onclick="closeTour()">Close</button></div>
+  </dialog>
+
+  <section id="today" class="l-briefing">
+    <div class="phead"><span class="picon" data-icon="today"></span><div><h2 class="ptitle">Today</h2><p class="sub">Your day at a glance: what needs you, what to do next, and a place to tell Atlas anything.</p></div></div>
+    <div class="card intrcard" id="intrCard" hidden>
+      <div class="chead"><h2>Stopped by a usage limit <span class="count" id="intrCount"></span></h2></div>
+      <p class="sub" style="margin-top:0">Unfinished work, not done. Copy the resume command into Termius when the limit has reset: it reopens the same session with everything it knew.</p>
+      <div id="intrList"></div>
+    </div>
+    <div class="card cmdcard" id="cmdCard" hidden>
+      <div class="chead"><h2>Run in your terminal <span class="count" id="cmdCount"></span></h2></div>
+      <p class="sub" style="margin-top:0">Steps an agent left for you, most important first. Open Termius and paste the command. Not sure what it does?
+        Type <code>claude</code> in Termius first and paste the Claude version: it explains the step, runs it and fixes what goes wrong.</p>
+      <div id="cmdList"></div>
+    </div>
+    <div class="glance" id="glance"></div>
+    <div class="cols">
+      <div class="col">
+        <div class="card dump">
+          <h2>Talk to Atlas</h2><p class="sub" id="managementFocus"></p>
+          <div id="chatLog"></div>
+          <textarea id="dump" placeholder="Describe what you want to build now, or ask Atlas a question."></textarea>
+          <div class="bar">
+            <span class="sub" id="micHint">Tip: your keyboard's mic works here too.</span>
+            <div class="btns"><select class="b" id="micLang" title="Spoken language" onchange="try{localStorage.setItem('hq.voiceLang',this.value)}catch(e){}"><option value="">Auto</option><option value="nl-NL">NL</option><option value="en-US">EN</option></select><button class="b" id="mic" disabled onpointerdown="if(!this.textContent.includes('Stop')) micTarget=null">🎙 Talk</button><button class="b" onclick="askClaude(this)">Ask Claude</button><button class="b primary" id="buildNowBtn" onclick="buildNow(this)">▶ Build now</button></div>
+          </div>
+          <details id="laterThought" style="margin-top:10px"><summary>Save a thought for later</summary><p class="sub">Use the text above to save a thought. Atlas will sort it into your plan.</p><button class="b" onclick="sendDump()">Add to brain</button></details>
+          <p id="buildNowResult" role="status" hidden></p>
+        </div>
+        <div class="card alert" id="needsCard" hidden><h2>Needs your input</h2>
+          <div class="sub" style="margin-bottom:6px">Only what Atlas cannot settle itself. Answer here by tapping, typing or 🎙; the agent keeps working on everything else.</div>
+          <div id="needs"></div></div>
+        <div class="card" id="deliveryCard" hidden><h2>Updates</h2>
+          <div class="sub" style="margin-bottom:6px">Pull requests from ready to merge to installed. Checked on GitHub every 10 minutes; merged work installs itself within 15.</div>
+          <div id="prList"></div></div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="chead"><h2>Your focus</h2><button class="b" title="Re-prioritise; when the plan has drifted, Claude also proposes a full do-over for your approval" onclick="replan(this)">Re-evaluate tasks</button></div>
+          <div class="review" id="focusText" style="margin-bottom:6px"></div>
+          <div id="recommended"></div>
+        </div>
+        <div class="card" id="inboxCard" hidden>
+          <h2>To review</h2>
+          <details class="inbox" id="proposedCard" hidden><summary>Atlas proposals <span class="count" id="proposedCount"></span></summary><div id="proposed"></div></details>
+          <details class="inbox" id="suggestCard" hidden><summary>Suggested plan changes <span class="count" id="suggestCount"></span></summary><div id="suggest"></div></details>
+          <details class="inbox" id="overdueCard" hidden><summary>Overdue tasks <span class="count" id="overdueCount"></span></summary><div id="overdue"></div></details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="forgehead" id="forgeHead" hidden>
+    <div class="phead"><span class="picon" data-icon="forge"></span><div><h2 class="ptitle">Forge</h2><p class="sub">Where raw ideas are heated, shaped and struck into real things.</p></div></div>
+    <div class="flow big" id="forgeFlow" data-flow="plan" aria-label="Forge stages"></div>
+  </div>
+
+  <section id="plan" class="l-planner">
+    <div class="phead"><span class="picon" data-icon="plan"></span><div><h2 class="ptitle">Plan</h2><p class="sub">Shaping: your master plan, with the mission, the goals and projects that serve it, and every task on the way.</p></div><div class="seg pviews" id="planSeg"></div></div>
+    <div data-view="master">
+      <div class="mission" id="mission"></div>
+      <div class="chead" style="margin-top:4px"><h2>Goals &amp; projects</h2><div class="btns"><button class="b" onclick="openNew('goals')">+ Goal</button></div></div>
+      <div class="goalgrid" id="goals"></div>
+      <div class="sub" style="margin:4px 0 14px">▶ in progress · ○ to do · ⏸ waiting on another task. → Build hands a task to the agent. ✎ edits.</div>
+      <div class="card" id="looseCard" hidden><h2>Not linked to a goal</h2><div id="loose"></div></div>
+      <div class="card"><h2>Roadmap phases</h2><div id="phases"></div></div>
+    </div>
+    <div data-view="tasks"><div class="card">
+      <div class="chead"><h2>Task overview <span class="sub" id="allCounts" style="text-transform:none;letter-spacing:0;font-weight:400"></span></h2>
+        <button class="b" onclick="openNew('tasks')">+ Task</button></div>
+      <div id="delivery" aria-label="Delivery: what is installed and what still has to happen"></div>
+      <div class="toolbar">
+        <input id="fSearch" type="search" placeholder="Search title, description or #ID" aria-label="Search tasks and ideas" oninput="scheduleTaskSearch()">
+        <select class="mini" id="fStatus" aria-label="Status" onchange="loadAll()"><option value="">open</option><option value="all">open + done</option>
+          <option value="doing">in progress</option><option value="todo">to do</option><option value="blocked">blocked</option>
+          <option value="proposed">proposed</option><option value="done">done</option><option value="dropped">dropped</option>
+          <option value="idea,test,build,scale">ideas only</option></select>
+        <select class="mini" id="fSort" aria-label="Sort tasks" onchange="loadAll()">
+          <option value="priority">Highest priority</option><option value="lowest">Lowest priority</option>
+          <option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="status">By status</option>
+        </select>
+      </div>
+      <details class="morefilters" id="moreFilters"><summary>More filters <span class="count" id="filterCount"></span></summary>
+        <div class="toolbar">
+          <select class="mini" id="fGoal" aria-label="Goal" onchange="loadAll()"></select>
+          <select class="mini" id="fDue" aria-label="Due date" onchange="loadAll()"><option value="">any due date</option><option value="overdue">overdue</option>
+            <option value="today">due by today</option><option value="week">due within 7 days</option><option value="none">no due date</option></select>
+          <select class="mini" id="fRecommendation" aria-label="Atlas recommendation" onchange="loadAll()"><option value="">All recommendations</option><option value="recommended">Recommended now</option><option value="other">Not currently recommended</option></select>
+          <label class="sub">Created from <input class="mini" id="fCreatedFrom" type="date" onchange="loadAll()"></label><label class="sub">to <input class="mini" id="fCreatedTo" type="date" onchange="loadAll()"></label>
+          <button class="b" onclick="resetTaskFilters()">Reset filters</button>
+        </div></details>
+      <div id="allList"></div>
+      <div class="sub" style="margin-top:10px">“waits on” lists unfinished tasks this one needs first; “blocks” lists tasks waiting on it. “Recommended” is Atlas’s current advice; the priority score is the plan’s ranking. ✎ edits.</div></div></div>
+    <div data-view="progress">
+      <div class="tiles" id="tiles"></div>
+      <div class="card">
+        <h2>Tasks completed per day · last 4 weeks</h2>
+        <div class="bars" id="bars"><div class="tip" id="tip"></div></div>
+        <div class="axis" id="axis"></div>
+        <details><summary class="sub" style="cursor:pointer;margin-top:8px">Show as table</summary><table class="data" id="dayTable"></table></details>
+      </div>
+      <div class="card"><h2>Due in the next 7 days</h2><div id="dueSoon"></div></div>
+      <div class="card" id="stalledCard" hidden><h2>In progress for over a week</h2><div id="stalled"></div></div>
+      <div class="card"><h2>Recently done</h2><div id="recent"></div></div>
+      <div class="card">
+        <div class="chead"><h2>Weekly review</h2><button class="b" onclick="writeReview(this)">Write now</button></div>
+        <div id="review"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="build" class="l-workbench">
+    <div class="phead"><span class="picon" data-icon="build"></span><div><h2 class="ptitle">Build</h2><p class="sub">On the anvil: what the agent is making right now, what comes next, and everything already forged.</p></div><div class="seg pviews" id="buildSeg"></div></div>
+    <div data-view="live">
+      <div class="pipe" id="pipeline" aria-label="Build pipeline"></div>
+      <div class="card">
+        <div class="chead"><h2 id="nowTitle">Now</h2><div class="btns"><span class="state" id="agentState"></span></div></div>
+        <div class="lanes" id="agentLanes" hidden></div>
+        <div id="agentNow"></div>
+        <div class="console" id="agentLog" role="log" aria-label="What the agent is doing, step by step" hidden></div>
+        <div class="bar2" id="agentBtns"></div>
+        <div class="meta" id="agentInfo" style="margin-top:8px"></div>
+      </div>
+    </div>
+    <div data-view="queue">
+      <div class="card"><h2>Execution order</h2><p class="sub">Your explicit queue runs before Atlas proposals.</p><div id="agentQueue"></div>
+        <div id="aiSuggestWrap" hidden><h2 style="margin:14px 0 4px">Claude would queue</h2><div id="aiSuggest"></div></div></div>
+      <div class="card"><div class="chead"><h2>Conflicts with main</h2>
+        <button class="b" title="Check every open pull request live on GitHub against the latest main" onclick="checkConflicts(this)">Scan for conflicts</button></div>
+        <div id="agentConflicts"></div></div>
+    </div>
+    <div data-view="tree">
+      <div class="card">
+        <div class="chead" style="flex-wrap:wrap">
+          <h2>Build path <span class="sub" id="treeCounts" style="text-transform:none;letter-spacing:0;font-weight:400"></span></h2>
+          <div class="seg" id="focusSeg"></div>
+        </div>
+        <div class="meta" id="focusText2"></div>
+        <div class="treewrap"><svg class="tree" id="tree" role="img" aria-label="Skill tree of Atlas's capabilities"></svg></div>
+        <div class="legend"><button class="chip" id="builtBtn" onclick="toggleBuilt()" style="font-size:12px;padding:2px 9px"></button><span><i style="background:var(--accent)"></i>unlocked</span><span><i style="background:var(--accent-soft);border:2px solid var(--accent)"></i>building</span>
+          <span><i style="border:2px dashed var(--accent)"></i>ready to build</span><span><i style="background:var(--chip);border:1px solid var(--line)"></i>locked</span>
+          <span><i style="border:1px dashed var(--muted)"></i>idea</span><span style="color:var(--warn)">★ agent builds next</span></div>
+        <div class="panel" id="nodePanel" hidden></div>
+        <div class="meta" id="buildNextLine" style="margin-top:8px"></div>
+        <div class="bar2"><button class="b" onclick="openNew('capabilities')">+ Capability</button>
+          <span class="sub" id="looseIdeas" style="align-self:center"></span></div>
+      </div>
+    </div>
+    <div data-view="history">
+      <div class="card"><h2>Runs</h2><div id="agentRuns"></div></div>
+    </div>
+    <div data-view="arsenal">
+      <div class="card"><h2>Arsenal · what you've built</h2><p class="sub" style="margin-top:0">Everything already forged, indexed so new work reuses it before building again.</p><div id="projList"></div></div>
+    </div>
+  </section>
+
+  <section id="brain" class="l-ideas">
+    <div class="phead"><span class="picon" data-icon="brain"></span><div><h2 class="ptitle">Ideas</h2><p class="sub">Raw material: thoughts that could become something. Atlas suggests where each one fits in your plan, or which new goal it could start.</p></div></div>
+    <div class="cols">
+      <div class="col">
+        <div class="chead"><h2>Ideas waiting for a place <span class="count" id="ideaCount"></span></h2>
+          <div class="btns"><button class="b" title="Let Claude suggest where open ideas fit (the word-overlap rule answers when no model is reachable)" onclick="placeIdeas(this)">✦ Re-place with AI</button><button class="b primary" onclick="openNew('ideas')">+ Idea</button></div></div>
+        <div class="ideagrid" id="ideaList"></div>
+        <details class="card" id="ideasDone" style="margin-top:14px"><summary>Ideas already in the plan <span class="count" id="ideaDoneCount"></span></summary><div id="ideaDoneList"></div></details>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="chead"><h2>From Research</h2></div>
+          <p class="sub" style="margin-top:0">Findings you saved. Turn one into an idea to give it a place in the plan.</p>
+          <div id="savedFindings"></div>
+        </div>
+        <details class="card"><summary>What Claude changed in your plan</summary>
+          <div id="brainChanges"></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section id="research" class="l-research">
+    <div class="phead"><span class="picon" data-icon="research"></span><div><h2 class="ptitle">Research</h2><p class="sub">Atlas's intelligence desk: developments that could improve what you build, why they matter, and room to dig deeper.</p></div><div class="seg pviews" id="researchSeg"></div></div>
+    <div data-view="feed">
+      <div class="card">
+        <div class="chead"><h2>Developments for you <span class="count" id="feedCount"></span></h2><button class="b" onclick="scan(this)">Scan now</button></div>
+        <p class="sub" style="margin-top:0">News, research and new capabilities worth knowing. Turn one into an opportunity: it becomes an idea in Forge, where you choose to adopt, adapt or build.</p>
+        <div class="chips" id="radarFilters"></div>
+        <div id="researchFeed"></div>
+        <div class="sub" id="radarLast" style="margin-top:10px"></div>
+      </div>
+    </div>
+    <div data-view="tools">
+      <div class="card">
+        <div class="chead"><h2>Tools &amp; capabilities <span class="count" id="toolCount"></span></h2></div>
+        <p class="sub" style="margin-top:0"><b>Adopt</b> uses the tool as it is · <b>Adapt</b> takes parts of the open-source code · <b>Build</b> makes our own version of the idea. Each becomes an idea in Forge. <b>Compare</b> asks Claude for compatibility, dependencies, benefit, effort and upkeep (one model call, only when you press it).</p>
+        <div id="researchTools"></div>
+      </div>
+    </div>
+    <div data-view="saved">
+      <div class="card"><h2>Saved findings</h2><div id="researchSaved"></div></div>
+    </div>
+    <div data-view="deep">
+      <div class="card">
+        <h2>Deep research</h2>
+        <p class="sub" style="margin-top:0">One question, answered for what you build: what it is, why it matters for Atlas, risks and next steps. One model call; the answer is kept.</p>
+        <textarea id="deepQ" class="deepq" placeholder="e.g. Could a local model on my GPU PC replace the cloud for sorting brain dumps?"></textarea>
+        <div class="bar2"><button class="b primary" id="deepBtn" onclick="deepResearch(this)">Research this</button></div>
+      </div>
+      <div id="researchNotes"></div>
+    </div>
+    <div data-view="sources">
+      <div class="card">
+        <h2>Sources &amp; limits</h2>
+        <p class="sub" style="margin-top:0">Light by design: RSS and public APIs, deduplicated, no model calls while scanning.</p>
+        <div class="form" id="researchForm"></div>
+        <div class="bar2"><button class="b primary" onclick="saveResearch(this)">Save</button></div>
+        <div class="meta" id="researchStatus" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="system" class="l-settings">
+    <div class="phead"><span class="picon" data-icon="system"></span><div><h2 class="ptitle">System</h2><p class="sub">Managing Atlas itself: connections, agent limits, recovery, voice, costs and what it knows about you.</p></div></div>
+    <div class="settings">
+      <div class="snav" id="sysNav" role="tablist" aria-label="System settings"></div>
+      <div class="spanel">
+        <div data-view="connections">
+          <div class="card" id="claudeConnection">
+            <h2>Claude connection</h2>
+            <p id="claudeAuthMessage">Check your connection or reconnect when your login expires.</p>
+            <div class="btns">
+              <button class="b" onclick="claudeAuth('check')">Check connection</button>
+              <button class="b primary" onclick="claudeAuth('start')">Reconnect Claude</button>
+              <button class="b" id="claudeAuthCancel" hidden onclick="claudeAuth('cancel')">Cancel sign-in</button>
+            </div>
+            <div id="claudeAuthFlow" hidden>
+              <p><a id="claudeAuthLink" target="_blank" rel="noopener noreferrer">Open Claude sign-in ↗</a></p>
+              <p>Sign in to your existing Claude account. If Claude gives you a code, paste it below.</p>
+              <input id="claudeAuthCode" type="password" autocomplete="off" aria-label="Claude sign-in code" placeholder="Paste sign-in code">
+              <button class="b primary" onclick="submitClaudeAuth()">Finish reconnecting</button>
+            </div>
+          </div>
+        </div>
+        <div data-view="agent">
+          <div class="card alert" id="killedCard" hidden>
+            <h2>Kill switch is on</h2>
+            <div class="row"><div class="grow">The agent is stopped, no new runs start and paid model calls are blocked.</div>
+              <div class="btns"><button class="b primary" onclick="act('unkill').then(r=>r&&toast('Kill switch off'))">Turn off</button></div></div>
+          </div>
+          <div class="card">
+            <div class="chead"><h2>Agent autonomy and limits</h2><button class="b danger" id="killBtn" onclick="killSwitch()">Kill switch</button></div>
+            <div class="slider">
+              <input type="range" min="0" max="3" step="1" id="auto" aria-label="Agent autonomy" oninput="autoPreview(this.value)" onchange="setAutonomy(this.value)">
+              <div class="ticks"><span>Off</span><span>Ask first</span><span>Within limits</span><span>Continuous</span></div>
+            </div>
+            <div class="meta" id="autoText"></div>
+            <div class="meta" style="margin-top:6px">Stop for review after
+              <select class="mini" id="batch" onchange="setBatch(this.value)"></select> <span id="batchText"></span></div>
+            <div class="meta" style="margin-top:6px">Daily limits:
+              <input class="mini" id="limRuns" type="number" min="1" step="1" style="width:4.5em" onchange="setLimit('runs',this.value)"> runs ·
+              <input class="mini" id="limTokens" type="number" min="0" step="100000" style="width:7em" onchange="setLimit('tokens',this.value)"> tokens ·
+              $<input class="mini" id="limUsd" type="number" min="0" step="0.5" style="width:5em" onchange="setLimit('usd',this.value)"> spend
+              <span class="sub">(0 = no limit)</span><div id="limText"></div></div>
+          </div>
+        </div>
+        <div data-view="constitution">
+          <div class="card" id="constitutionCard">
+            <h2>What the agent believes it should do</h2>
+            <div id="constitution"></div>
+            <p class="sub" style="margin-top:12px">From config/constitution.toml. Only you change it; Atlas may propose a change for your approval, never apply one.</p>
+          </div>
+        </div>
+        <div data-view="recovery">
+          <div class="card" id="recoveryCard"><h2>Automatic recovery</h2><p id="recoveryStatus"></p><button class="b" id="recoveryToggle" onclick="act('recovery_toggle',null,D.recovery.enabled?'off':'on')"></button><h2 style="margin-top:14px">Incidents & repairs</h2><div id="recoveryIncidents"></div></div>
+        </div>
+        <div data-view="voice">
+          <div class="card">
+            <h2>Voice · Whisper <span class="state" id="voiceState"></span></h2>
+            <div class="sub" id="voiceNow"></div>
+            <div class="seg" id="voiceTiers" style="margin-top:8px"></div>
+            <div class="panel form"><div id="voicePanel"></div><div class="meta" id="voiceCheck" style="margin-top:8px"></div></div>
+          </div>
+        </div>
+        <div data-view="usage">
+          <div class="card">
+            <h2>Usage · tokens and estimated cost</h2>
+            <div class="tiles three" id="usageTiles" style="margin-bottom:6px"></div>
+            <div class="sub" id="usageNote"></div>
+            <table class="data" id="usageJobs"></table>
+          </div>
+          <div class="card" id="budgetCard">
+            <h2>Budgets · automatic model use</h2>
+            <div class="sub">Paid model calls (Claude API or Claude Code) per day for each job Atlas runs by itself. Over budget the job falls back to its rule or a local model; nothing expensive starts silently. What you start yourself (chat, brain dump, research) is not capped. Change the numbers under [budgets] in the constitution.</div>
+            <div class="card alert" id="budgetWarn" hidden style="margin:8px 0"></div>
+            <table class="data" id="budgetJobs"></table>
+          </div>
+        </div>
+        <div data-view="updates">
+          <div class="card" id="updCard">
+            <div class="chead"><h2>Updates</h2><button class="b" onclick="openUpdates()">Check now</button></div>
+            <div id="updBody" class="sub">Merged work installs by itself within 15 minutes, after its tests pass.</div>
+          </div>
+        </div>
+        <div data-view="appearance">
+          <div class="card">
+            <h2>Appearance</h2>
+            <p class="sub">Theme for this device.</p>
+            <div class="seg" id="themeSeg"></div>
+          </div>
+        </div>
+        <div data-view="resources">
+          <div class="card"><h2>Resource map</h2><div class="grid" id="resList"></div></div>
+        </div>
+        <div data-view="activity">
+          <div class="card"><h2>Recent activity</h2><div id="log"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+<div class="undo" id="undo" role="status" aria-live="polite"><span id="undoMsg"></span><button id="undoBtn" type="button">Undo</button></div>
+<dialog id="editor"><form class="form" method="dialog" onsubmit="saveEdit(event)">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0" id="edTitle"></h2>
+    <button type="button" class="b" onclick="$('editor').close()">Close</button></div>
+  <div id="edFields"></div>
+  <div class="bar2" style="justify-content:space-between"><button type="button" class="b" id="edDrop" onclick="dropItem()">Remove</button>
+    <span><button type="button" class="b" id="edQueue" hidden onclick="queueDraft()" title="Save these edits and put the task in your build queue">Save &amp; queue</button>
+    <button class="b primary" type="submit">Save</button></span></div>
+</form></dialog>
+
+<script>
+// five areas, each with its own job and layout: the day (Today), what should happen (Plan), making it (Build),
+// thoughts not yet in the plan (Brain) and managing Atlas itself (System). Each function lives in exactly one place.
+// Main navigation: the day (Today), making things (Forge, with its stages Ideas → Plan → Build), finding what is
+// new (Research) and managing Atlas itself (System). Each function lives in exactly one place.
+const TABS = [["today","Today"],["forge","Forge"],["research","Research"],["system","System"]];
+const STAGES = [["brain","Ideas"],["plan","Plan"],["build","Build"]];   // Forge's stages; brain is the section id of Ideas
+const isStage = t => STAGES.some(([k])=>k===t);
+const VIEWS = {plan:[["master","Master plan"],["tasks","Tasks"],["progress","Progress"]],
+  build:[["live","Live"],["queue","Queue"],["tree","Skill tree"],["history","History"],["arsenal","Arsenal"]],
+  research:[["feed","Developments"],["tools","Tools"],["saved","Saved"],["deep","Deep research"],["sources","Sources & limits"]],
+  system:[["connections","Connections"],["agent","Agent & limits"],["constitution","Constitution"],["recovery","Recovery"],["voice","Voice"],["usage","Usage"],
+          ["updates","Updates"],["appearance","Appearance"],["resources","Resources"],["activity","Activity"]]};
+const OLD_TABS = {progress:["plan","progress"], all:["plan","tasks"], agent:["build","live"], resources:["system","resources"], radar:["brain"], ideas:["brain"]};
+// small line icons (24×24, stroke): a visual cue per area and function
+const ICONS = {today:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  plan:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>',
+  build:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
+  brain:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+  system:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+  needs:'<path d="M12 9v4M12 17h0"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  done:'<path d="M20 6 9 17l-5-5"/>', next:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  queue:'<path d="M4 6h16M4 12h16M4 18h10"/>', review:'<circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M6 8v8M18 16V9a3 3 0 0 0-3-3h-4"/>',
+  live:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', connections:'<path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
+  agent:'<rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h0M15 13h0M2 13v2M22 13v2"/>', recovery:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+  voice:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>', usage:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  resources:'<rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/><path d="M7 7h0M7 17h0"/>',
+  activity:'<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  constitution:'<path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2M9 8h6M9 12h6M9 16h3"/>',
+  updates:'<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/>', appearance:'<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/>',
+  goal:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  forge:'<path d="M4 9h11a4 4 0 0 0 4-4V4H8"/><path d="M4 9c0 3 2 4 5 4h3c3 0 4-1 4-4"/><path d="M9 13v4M13 13v4M6 20h10M8 17h6"/>',
+  research:'<circle cx="10" cy="10" r="6"/><path d="m21 21-6.5-6.5M10 7v6M7 10h6"/>', feed:'<path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/>'};
+const icon = k => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[k]||""}</svg>`;
+const SRC = {github:"GitHub", hn:"Hacker News", arxiv:"Papers", hf:"Models"};
+const PHASES = ["Foundation","Always on","Thinking","Reach","Act"];
+let SUGGEST = [], D = null, tab = "today", srcFilter = "all", TOKEN = "";
+const view = {plan:"master", build:"live", research:"feed", system:"connections"};
+let stage = "brain";   // the open Forge stage   // the open sub-view of each area
+try { const t = new URLSearchParams(location.search).get("t"); if (t) { localStorage.setItem("hq.token", t); history.replaceState(null, "", "/"); } TOKEN = localStorage.getItem("hq.token") || ""; } catch(e) {}
+const H = () => TOKEN ? {"X-HQ-Token": TOKEN} : {};
+try { tab = localStorage.getItem("hq.tab") || "today"; stage = localStorage.getItem("hq.stage") || stage; Object.assign(view, JSON.parse(localStorage.getItem("hq.views") || "{}"));
+  const old = localStorage.getItem("hq.planView"); if (old === "tree") { view.build = "tree"; localStorage.removeItem("hq.planView"); } } catch(e) {}
+if (OLD_TABS[tab]) { const [t, v] = OLD_TABS[tab]; tab = t; if (v) view[t] = v; }   // a tab saved before the current layout
+if (isStage(tab)) { stage = tab; tab = "forge"; }
+if (!TABS.some(([k])=>k===tab)) tab = "today";
+if (!isStage(stage)) stage = "brain";
+for (const k in VIEWS) if (!VIEWS[k].some(([v])=>v===view[k])) view[k] = VIEWS[k][0][0];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const empty = t => `<div class="empty">${t}</div>`;
+
+function toast(t, ms=1800){ const el=$("toast"); el.textContent=t; el.classList.add("on"); clearTimeout(toast.h); toast.h=setTimeout(()=>el.classList.remove("on"),ms); }
+
+async function act(op, id, text){
+  let j;
+  try { const r = await fetch("/api/action",{method:"POST",headers:{"Content-Type":"application/json",...H()},body:JSON.stringify({op,id,text})}); j = await r.json(); }
+  catch(e) { toast("Atlas could not be reached; nothing was changed.", 7000); return null; }
+  if(j.error){ toast(j.error, 7000); return null; }
+  act.changes = j.changes || [];   // change-log entries this action made: what Undo reverses
+  await load(); return j.result;
+}
+
+// Optimistic UI: the item fades out the moment it is clicked; the server call follows. When the server refuses,
+// the item comes back and the error shows. Reversible actions get Undo for UNDO_MS: by default the change-log
+// entries the action made (act.changes), or the given undo(). Irreversible things (merges, installs) never use this.
+const UNDO_MS = 7000;
+async function optimistic(el, run, msg, undo){
+  const row = el && (el.closest ? el.closest(".row") || el : el);
+  if (row) row.classList.add("leaving");
+  const hide = row && setTimeout(() => { row.hidden = true; }, 230);
+  const r = await run();
+  if (r === null || r === undefined) {          // refused or unreachable: put it back (act already said why)
+    if (row) { clearTimeout(hide); row.hidden = false; row.classList.remove("leaving"); }
+    return null;
+  }
+  const ids = (act.changes || []).slice();
+  const back = undo || (ids.length ? () => act("brain_undo_many", null, ids.join(",")) : null);
+  showUndo(msg || (typeof r === "string" ? r : "Done"), back);
+  return r;
+}
+function showUndo(msg, back){
+  $("toast").classList.remove("on"); clearTimeout(toast.h);
+  const bar = $("undo"); $("undoMsg").textContent = msg; $("undoBtn").hidden = !back;
+  $("undoBtn").onclick = async () => { bar.classList.remove("on"); const r = await back(); if (r !== null) toast("Undone"); };
+  bar.classList.add("on"); clearTimeout(showUndo.h); showUndo.h = setTimeout(() => bar.classList.remove("on"), back ? UNDO_MS : 2500);
+}
+
+let claudeAuthSession = '', claudeAuthTimer;
+async function claudeAuth(action, payload){
+  clearTimeout(claudeAuthTimer);
+  try {
+    const r = await fetch('/api/action', {method:'POST', headers:{'Content-Type':'application/json',...H()},
+      body:JSON.stringify({op:'claude_auth_'+action, text:payload?JSON.stringify(payload):''})});
+    const j = await r.json();
+    if (j.error) throw new Error(j.error);
+    const a = JSON.parse(j.result);
+    claudeAuthSession = a.session;
+    $('claudeAuthMessage').textContent = a.message;
+    $('claudeAuthFlow').hidden = !a.url || a.state !== 'waiting';
+    const link = $('claudeAuthLink');
+    if (a.url) link.href = a.url; else link.removeAttribute('href');
+    const pending = ['starting','waiting','verifying'].includes(a.state);
+    $('claudeAuthCancel').hidden = !pending;
+    if (pending) claudeAuthTimer = setTimeout(()=>claudeAuth('status'), 2000);
+  } catch(e) { $('claudeAuthMessage').textContent = e.message; }
+}
+function submitClaudeAuth(){
+  const code = $('claudeAuthCode').value;
+  $('claudeAuthCode').value = '';
+  return claudeAuth('submit', {session:claudeAuthSession, code});
+}
+
+async function openTaskDetail(id){
+  $('taskDetailTitle').textContent='Loading…';$('taskDetailBody').replaceChildren();$('taskDetailDialog').showModal();
+  try {
+    const response=await fetch('/api/task-detail?id='+id,{headers:H()});const data=await response.json();if(data.error)throw new Error(data.error);
+    $('taskDetailTitle').textContent=data.task.title;
+    const section=(title,text)=>{const h=document.createElement('h3'),p=document.createElement('p');h.textContent=title;p.textContent=text;p.style.whiteSpace='pre-wrap';$('taskDetailBody').append(h,p);};
+    section('Status', '#'+data.task.id+' · '+data.task.status+' · created '+(data.task.created||'unknown')+' · '+(data.recommended?'Recommended now':'Not currently recommended'));
+    section('Why Atlas recommends it',data.why+(data.evaluated_at?' · evaluated '+data.evaluated_at:''));
+    const r=data.rationale||{};
+    section('Problem to solve',r.problem||data.task.description||'No problem statement has been recorded yet.');
+    section('Why now',r.why_now||'Ranking factors: '+data.priority_factors);
+    section('Expected result',r.benefit||'Atlas has not yet recorded a detailed expected benefit. Re-evaluate tasks after reconnecting Claude.');
+    if(data.focus)section('Current direction',data.focus);
+    section('Your goal',data.goal?data.goal.title+(data.goal.why?' — '+data.goal.why:''):'Not yet linked to a goal.');
+    const o=data.overlap;
+    section('Already in Atlas?',o?o.label+(o.match_ref?' → '+o.match_kind+' '+o.match_ref+' “'+o.match_title+'”':'')+': '+o.why+(o.by==='rule'?' (word-overlap rule)':' (Claude)')+(o.rewrite?'\nAs an addition: '+o.rewrite.title+'. '+o.rewrite.description:'')+(o.verdict==='exists'&&!o.settled?'\nThe agent waits for your decision (Needs your input).':''):'Not checked yet; Atlas checks before building (hq overlap check task '+data.task.id+').');
+    section('What must happen first',data.dependencies.length?data.dependencies.map(d=>'#'+d.id+' '+d.title+' ('+d.status+')').join('\n'):'No task dependencies recorded.');
+    section('Effort and uncertainty','Estimated effort: '+data.task.effort_h+' hours. '+(r.tradeoffs||'No further tradeoffs have been assessed yet.'));
+    section('How to know it helped',r.success_check||'No success check recorded yet.');
+  } catch(e){$('taskDetailTitle').textContent='Could not load explanation';$('taskDetailBody').textContent=e.message;}
+}
+
+let activeGuide=null, activeStep=0, highlighted=null;
+function guideSeen(id){try{return localStorage.getItem('hq.guide.'+id)==='seen';}catch(e){return false;}}
+function renderGuideOffer(){
+  const fresh=(D.guides||[]).filter(g=>!guideSeen(g.id));
+  $('helpBtn').classList.toggle('dot',!!fresh.length);
+  $('helpBtn').title=fresh.length?`Help: ${fresh.length} new walkthrough${fresh.length>1?'s':''}`:'Help and walkthroughs';
+}
+function dismissGuides(){for(const g of D.guides||[])try{localStorage.setItem('hq.guide.'+g.id,'seen');}catch(e){}renderGuideOffer();}
+function openHelp(){
+  $('helpList').replaceChildren();
+  for(const guide of D.guides||[]){const b=document.createElement('button');b.className='b';b.style.margin='5px';b.textContent=guide.title+(guideSeen(guide.id)?'':' · new');b.onclick=()=>startTour(guide);$('helpList').append(b);}
+  $('helpDialog').showModal();
+}
+function startTour(guide){$('helpDialog').close();activeGuide=guide;activeStep=0;showTourStep();}
+function showTourStep(){
+  if(highlighted){highlighted.style.outline='';highlighted=null;}
+  const step=activeGuide.steps[activeStep];setTab(step.tab,step.view);
+  const target=$(step.target);
+  if(target){const fold=target.closest('details');if(fold)fold.open=true;target.scrollIntoView({behavior:'smooth',block:'center'});target.style.outline='3px solid var(--accent)';highlighted=target;}
+  $('tourTitle').textContent=activeGuide.title+' · '+(activeStep+1)+'/'+activeGuide.steps.length;
+  $('tourText').textContent=step.text;$('tourBack').disabled=activeStep===0;
+  $('tourNext').textContent=activeStep===activeGuide.steps.length-1?'Done':'Next';
+  if(!$('tourDialog').open)$('tourDialog').show();
+  $('tourNext').focus({preventScroll:true});
+}
+function tourStep(delta){activeStep+=delta;if(activeStep>=activeGuide.steps.length){try{localStorage.setItem('hq.guide.'+activeGuide.id,'seen');}catch(e){}closeTour();renderGuideOffer();}else showTourStep();}
+function closeTour(){if(highlighted)highlighted.style.outline='';highlighted=null;activeGuide=null;$('tourDialog').close();}
+$('tourDialog').addEventListener('cancel',closeTour);
+
+function applyTheme(){ let t=""; try{t=localStorage.getItem("hq.theme")||""}catch(e){}
+  if (t) document.documentElement.dataset.theme=t; else delete document.documentElement.dataset.theme;
+  const seg=$("themeSeg"); if (seg) seg.innerHTML = [["","Automatic"],["light","Light"],["dark","Dark"]].map(([k,l])=>`<button class="${k===t?"on":""}" onclick="setTheme('${k}')">${l}</button>`).join(""); }
+function setTheme(t){ try{localStorage.setItem("hq.theme", t)}catch(e){} applyTheme(); }
+// setTab('plan'), setTab('build','queue') or setTab('brain') open that Forge stage; setTab('forge') reopens the last one
+function setTab(t, v){ if (isStage(t)) { stage = t; t = "forge"; } tab = t; const area = t === "forge" ? stage : t;
+  if (v && VIEWS[area]) view[area] = v; if (t==='system' && view.system==='connections') claudeAuth('status');
+  try{localStorage.setItem("hq.tab",t); localStorage.setItem("hq.stage",stage); localStorage.setItem("hq.views",JSON.stringify(view));}catch(e){}
+  render(); window.scrollTo(0,0); }
+
+// Top-bar search. #99: typing filters the open page (cards without a match fade, matches are highlighted).
+// #100: Enter jumps to the best match anywhere in Atlas; arrow-down lists the top guesses.
+const gsNorm = s => String(s||"").toLowerCase();
+function gsScore(q, label, extra){ const l = gsNorm(label), x = gsNorm(extra); if (!q) return 0;
+  if (l === q) return 100; if (l.startsWith(q)) return 80; if (l.split(/\W+/).some(w=>w.startsWith(q))) return 60;
+  if (l.includes(q)) return 40; if (x.includes(q)) return 20; return 0; }
+function gsIndex(){ const out = [];
+  for (const [k,l] of TABS) out.push({label:l, kind:"Area", go:()=>setTab(k)});
+  for (const [k,l] of STAGES) out.push({label:l, kind:"Forge stage", go:()=>setTab(k)});
+  for (const a in VIEWS) for (const [v,l] of VIEWS[a]) out.push({label:l, kind:"Page · "+a, extra:a, go:()=>setTab(a,v)});
+  if (typeof D === "object" && D) {
+    for (const g of D.goals||[]) if (g && g.title) out.push({label:g.title, kind:"Goal", go:()=>setTab("plan","master")});
+    for (const i of D.ideas||[]) if (i && i.title && i.gate==="idea") out.push({label:i.title, kind:"Idea", go:()=>setTab("brain")});
+    for (const t of D.recommended||[]) if (t && t.id && t.title) out.push({label:"#"+t.id+" "+t.title, kind:"Task", go:()=>openTaskDetail(t.id)}); }
+  return out; }
+function gsMatches(q){ q = gsNorm(q).trim(); if (!q) return [];
+  return gsIndex().map(e=>({...e, score:gsScore(q, e.label, e.extra)})).filter(e=>e.score>0).sort((a,b)=>b.score-a.score).slice(0,6); }
+function gsFilterPage(q){ q = gsNorm(q).trim();
+  const sec = document.getElementById(tab==="forge"?stage:tab);
+  for (const m of document.querySelectorAll("mark.gs")) m.replaceWith(document.createTextNode(m.textContent));
+  if (!sec) return;
+  for (const c of sec.querySelectorAll(".card")) c.classList.toggle("gs-miss", !!q && !gsNorm(c.textContent).includes(q));
+  if (!q) return;
+  const w = document.createTreeWalker(sec, NodeFilter.SHOW_TEXT), hits = [];
+  for (let n; (n = w.nextNode());) if (n.parentElement && !/^(SCRIPT|STYLE|TEXTAREA|MARK)$/.test(n.parentElement.tagName) && gsNorm(n.nodeValue).includes(q)) hits.push(n);
+  for (const n of hits.slice(0,200)) { const i = gsNorm(n.nodeValue).indexOf(q), r = document.createRange();
+    r.setStart(n,i); r.setEnd(n,i+q.length); const m = document.createElement("mark"); m.className = "gs"; r.surroundContents(m); } }
+let gsList = [], gsSel = -1;
+function gsShow(){ const box = $("gResults"); box.hidden = !gsList.length; $("gSearch").setAttribute("aria-expanded", String(!!gsList.length));
+  box.innerHTML = gsList.map((e,i)=>`<div role="option" class="${i===gsSel?"on":""}" onmousedown="gsPick(${i})">${esc(e.label)}<small>${esc(e.kind)}</small></div>`).join(""); }
+function gsClose(){ gsList = []; gsSel = -1; if ($("gResults")) gsShow(); }
+function gsInput(){ const q = $("gSearch").value; gsFilterPage(q); gsList = []; gsSel = -1; gsShow(); }
+function gsPick(i){ const e = gsList[i]; if (!e) return; $("gSearch").value = ""; gsFilterPage(""); gsClose(); e.go(); }
+function gsKey(ev){ const q = $("gSearch").value;
+  if (ev.key === "ArrowDown") { ev.preventDefault(); if (!gsList.length) gsList = gsMatches(q); if (gsList.length) { gsSel = (gsSel+1) % gsList.length; gsShow(); } }
+  else if (ev.key === "ArrowUp" && gsList.length) { ev.preventDefault(); gsSel = (gsSel-1+gsList.length) % gsList.length; gsShow(); }
+  else if (ev.key === "Enter") { ev.preventDefault(); const l = gsList.length ? gsList : gsMatches(q); gsList = l; gsPick(gsSel >= 0 ? gsSel : 0); }
+  else if (ev.key === "Escape") { $("gSearch").value = ""; gsFilterPage(""); gsClose(); } }
+
+function renderNav(){
+  document.body.dataset.tab = tab; applyTheme();
+  const counts = {today: ((D.interruptions||[]).length+(D.commands||[]).length+D.needs.length+D.proposed.length+D.brain.suggest.length+D.progress.overdue.length)||"",
+    forge: D.agent.current?"●":(D.ideas||[]).filter(i=>i.gate==="idea").length||"",
+    research: ((D.research||{}).feed||[]).filter(i=>i.impact==="high"&&i.state==="new").length||"", system: D.agent.killed?"!":""};
+  $("nav").innerHTML = TABS.map(([k,l])=>`<button class="t-${k} ${k===tab?"on":""}" onclick="setTab('${k}')">${icon(k)}${l}${counts[k]?`<span class="count">${counts[k]}</span>`:""}</button>`).join("");
+  const open = tab === "forge" ? stage : tab;
+  document.querySelectorAll("section").forEach(s=>s.classList.toggle("on", s.id===open));
+  $("forgeHead").hidden = tab !== "forge"; $("forgeFlow").dataset.flow = stage;
+  document.body.dataset.stage = tab === "forge" ? stage : "";
+  document.querySelectorAll("[data-icon]").forEach(el=>{ if (!el.firstChild) el.innerHTML = icon(el.dataset.icon); });
+  for (const k of ["plan","build","research"]) $(k+"Seg").innerHTML = VIEWS[k].map(([v,l])=>`<button class="${v===view[k]?"on":""}" onclick="setTab('${k}','${v}')">${l}</button>`).join("");
+  const sys = {connections:"", agent: D.agent.killed?["killed","bad"]:[D.agent.autonomy,""], recovery: D.recovery&&D.recovery.incidents.some(i=>i.status!=="resolved")?["incident","bad"]:"",
+    voice: [D.voice.setup.active.length?"on":"browser",""], usage:"", resources:"", activity:"",
+    updates: (D.update||{}).behind ? [`${D.update.behind} new`,"bad"] : [D.version.sha,""], constitution:"", appearance:""};
+  $("sysNav").innerHTML = VIEWS.system.map(([v,l])=>`<button role="tab" aria-selected="${v===view.system}" class="${v===view.system?"on":""}" onclick="setTab('system','${v}')">${icon(v)}${l}${sys[v]?`<span class="st ${sys[v][1]}">${esc(sys[v][0])}</span>`:""}</button>`).join("");
+  for (const k in VIEWS) document.querySelectorAll(`#${k} [data-view]`).forEach(v=>v.hidden = v.dataset.view !== view[k]);
+}
+
+// a task has two actions: Run (the agent builds it, then marks it done) or Delete (discard; undoable)
+const taskBtns = id => `<div class="btns"><button class="b" onclick="openTaskDetail(${id})">Why this?</button><button class="b" title="Hand it to the agent" onclick="act('run',${id}).then(r=>r&&toast(r))">▶ Run</button>
+  <button class="b" title="Delete: discard this suggestion (undoable)" onclick="optimistic(this,()=>act('delete',${id}),'Task deleted')">✕</button></div>`;
+
+const taskRow = t => `<div class="row">
+  <div class="grow"><div class="title">${esc(t.title)}</div>
+  <div class="meta">~${t.effort_h}h${t.due?` · due ${t.due}`:""}${t.status==="doing"?" · in progress":""}</div></div>${taskBtns(t.id)}</div>`;
+
+const radarRow = r => `<div class="row">
+  <div class="grow"><div class="title">${r.state==="starred"?'<span class="star">★</span> ':""}<a href="${esc(r.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${esc(r.title)}</a></div>
+  <div class="meta"><span class="tag">${SRC[r.source]||r.source}</span>${r.popularity?`${Math.round(r.popularity)} ${r.source==="hn"?"points":r.source==="github"?"stars":"likes"} · `:""}${r.summary!==r.title?esc(r.summary).slice(0,160):""}</div>
+  ${r.matched?`<div class="meta">${r.matched.split(", ").map(m=>`<span class="tag match">${esc(m)}</span>`).join("")}</div>`:""}</div>
+  <div class="btns">
+    <button class="b" title="Keep" onclick="act('${r.state==="starred"?"new":"starred"}',${r.id})">${r.state==="starred"?"Unstar":"★"}</button>
+    <button class="b" title="Turn into idea" onclick="act('idea',${r.id}).then(()=>toast('Added to ideas'))">→ Idea</button>
+    <button class="b" title="Hide" onclick="optimistic(this,()=>act('dismissed',${r.id}),'Hidden',()=>act('new',${r.id}))">✕</button></div></div>`;
+
+function render(){
+  if(!D) return;
+  renderNav();
+  $('managementFocus').textContent=D.management_focus||'';
+  renderGuideOffer();
+  if(D.recovery){
+    $('recoveryStatus').textContent=D.recovery.status+(D.recovery.checked?' · checked '+D.recovery.checked.replace('T',' '):'');
+    $('recoveryToggle').textContent=D.recovery.enabled?'Pause automatic repairs':'Enable automatic repairs';
+    $('recoveryIncidents').innerHTML=D.recovery.incidents.map(i=>`<div class="row"><div><b>${esc(i.error_type)}</b> · ${esc(i.status)} · ${i.occurrences} occurrence(s)<div class="meta">${esc(i.detail)}${i.task_id?' · task #'+i.task_id:''}</div></div></div>`).join('')||empty('No incidents recorded.');
+  }
+  const d = new Date(D.today+"T12:00");
+  $("hdr").textContent = d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"}) + ` · Phase ${D.phase} · ${PHASES[D.phase]||""}`;
+  const behind = (D.update||{}).behind||0;
+  $("verBtn").hidden = !behind; $("verBtn").textContent = `Update · ${behind} new`;
+
+  renderNeeds(D.needs);
+  renderDelivery(D.delivery);
+  renderInterruptions(D.interruptions || []);
+  renderCommands(D.commands || []);
+  renderToday(D);
+  renderBuild(D.tree);
+  $("proposedCard").hidden = !D.proposed.length; $("proposedCount").textContent = D.proposed.length || "";
+  $("proposed").innerHTML = D.proposed.map(t=>`<div class="row"><div class="grow"><div class="title">${esc(t.title)}</div>
+    <div class="meta">${esc(t.description)}</div></div><div class="btns"><button class="b" onclick="optimistic(this,()=>act('dropped',${t.id}),'Rejected')">Reject</button>
+    <button class="b primary" onclick="optimistic(this,()=>act('accept',${t.id}),'Added to plan')">Accept</button></div></div>`).join("");
+
+
+  renderResearch(D.research);
+
+  renderIdeas(D.ideas);
+  renderChanges(D.brain);
+
+  $("mission").innerHTML = `<div class="k">${icon("goal")}Mission · phase ${D.phase} ${esc(PHASES[D.phase]||"")}</div><p>${esc(D.mission)}</p>
+    <button class="ed" onclick="setTab('system','constitution')">What the agent may and may not do →</button>`;
+  renderConstitution(D.constitution); renderFlow();
+  $("phases").innerHTML = D.phases.map(p=>{ const pct = Math.round(100*(p.done||0)/p.total);
+    return `<div class="phase"><div class="top"><span><b>${p.phase} · ${PHASES[p.phase]||"Phase"}</b> <span class="sub">${p.start||""} → ${p.finish||""}</span></span><span class="sub">${p.done||0}/${p.total}</span></div>
+    <div class="track"><div class="fill" style="width:${pct}%"></div></div></div>`;}).join("");
+  renderPlan(D.plan);
+  if (tab === "plan" && view.plan === "tasks") loadAll();
+
+  $("resList").innerHTML = D.resources.map(r=>`<div class="res"><div class="k">${esc(r.kind)}</div><div class="title">${esc(r.name)}</div>
+    <div class="meta">${r.value!=null?`${r.value} ${esc(r.unit)} · `:""}${esc(r.details)}</div></div>`).join("") || empty("Empty. Add with: ./hq.sh add resource \"RTX PC\" --category hardware");
+  $("projList").innerHTML = (D.projects||[]).map(p=>`<div class="row"><div class="grow"><div class="title">${esc(p.name)}</div>
+    <div class="meta">${p.assets} reusable parts${p.description?` · ${esc(p.description).slice(0,120)}`:""}</div></div></div>`).join("") || empty("Nothing indexed yet. Add a folder: ./hq.sh arsenal add ~/Projects/finance-app");
+  renderProgress(D.progress);
+  renderAgent(D.agent, D.usage);
+  renderVoice(D.voice.setup);
+  renderGlance(D); renderPipeline(D.agent);
+  $("inboxCard").hidden = $("proposedCard").hidden && $("suggestCard").hidden && $("overdueCard").hidden;
+  $("log").innerHTML = D.log.map(l=>`<div class="row"><div class="grow"><div class="meta">${l.ts.replace("T"," ").slice(5,16)} · ${esc(l.actor)} · ${esc(l.action)} ${esc(l.detail).slice(0,80)}</div></div></div>`).join("");
+}
+
+// Updates: PR ready → merged (installs within 15 min) → installed; 'already done?' suggestions from merged PRs.
+// Merging stays on GitHub (irreversible: no optimistic state here); suggestions answer optimistically with undo.
+function renderDelivery(dl){
+  dl = dl || {review:[],install:[],installed:[],suggestions:[]};
+  const pr = (p, tag, cls, extra="") => `<div class="row"><div class="grow"><div class="title"><span class="tag ${cls}">${tag}</span>${esc(p.title)}</div>
+    <div class="meta">PR #${p.number}${p.tasks.length?` · task${p.tasks.length>1?"s":""} ${p.tasks.map(t=>"#"+t).join(", ")}`:""}${extra}</div></div>
+    <div class="btns"><a class="b${cls==="bad"?" primary":""}" href="${esc(p.url)}" target="_blank" rel="noopener">${cls==="bad"?"Review on GitHub":"Open"}</a></div></div>`;
+  const rows = dl.review.map(p=>pr(p,"Ready to merge","bad"))
+    .concat(dl.install.map(p=>pr(p,"Merged","", " · installs within 15 minutes, or now via Update")))
+    .concat(dl.installed.map(p=>pr(p,"Installed","ok", ` · ${esc((p.installed_at||"").replace("T"," ").slice(5,16))}`)))
+    .concat(dl.suggestions.map(c=>`<div class="row" data-rec="${c.id}"><div class="grow"><div class="title"><span class="tag">Already done?</span>#${c.task_id} ${esc(c.title)}</div>
+      <div class="meta">${esc(c.evidence)}${c.url?` · <a href="${esc(c.url)}" target="_blank" rel="noopener">PR</a>`:""}</div></div>
+      <div class="btns"><button class="b" onclick="reconcile(${c.id},'not_related',this)">Not related</button>
+      <button class="b" onclick="reconcile(${c.id},'partial',this)">Partly</button>
+      <button class="b primary" onclick="reconcile(${c.id},'done',this)">✓ Done</button></div></div>`));
+  $("deliveryCard").hidden = !rows.length;
+  $("prList").innerHTML = rows.join("");
+}
+async function reconcile(id, answer, btn){
+  const row = btn.closest(".row");
+  await optimistic(row, () => act("reconcile", id, answer), answer==="done" ? "Marked done" : answer==="partial" ? "Noted as partly done" : "Dismissed");
+}
+
+// Needs your input: decisions (options or own answer), approvals (with a note), his tasks the agent waits for.
+// Item text never goes into an onclick attribute: buttons refer to items by key and option index.
+let NEEDS = [], micTarget = null;
+const needsInput = k => $("ni-"+k);
+function renderNeeds(list){
+  const kept = Object.fromEntries(NEEDS.map(i=>[i.key, (needsInput(i.key)||{}).value||""]));
+  NEEDS = list || [];
+  $("needsCard").hidden = !NEEDS.length;
+  const holds = i => i.holds.length ? `<div class="meta">${i.kind==="task"?"Paused until then":"Holds up"}: ${i.holds.map(h=>`#${h.id} ${esc(h.title)}`).join(", ")}</div>` : "";
+  $("needs").innerHTML = NEEDS.map((i,n)=>`<div class="row"><div class="grow">
+    <div class="title"><span class="tag">${i.kind==="decision"?"Decide":i.kind==="approval"?"Approve?":"Your task"}</span>${esc(i.title)}</div>
+    ${i.why?`<div class="meta">${esc(i.why)}</div>`:""}${holds(i)}
+    ${i.detail?`<details><summary class="sub">Show the diff</summary><pre style="white-space:pre-wrap;font-size:12px">${esc(i.detail)}</pre></details>`:""}
+    ${i.options.length?`<div class="btns" style="margin-top:6px">${i.options.map((o,m)=>`<button class="b primary" onclick="needsAnswer(${n},{text:NEEDS[${n}].options[${m}]})">${esc(o)}</button>`).join("")}</div>`:""}
+    <div class="bar" style="margin-top:6px;gap:6px"><input id="ni-${i.key}" style="flex:1;min-width:0" placeholder="${i.kind==="decision"?"Or type your own answer…":i.kind==="approval"?"Optional note…":"What you did, or how Atlas should go on…"}" value="${esc(kept[i.key]||"")}">
+      <div class="btns"><button class="b" title="Speak your input" onclick="needsMic(${n})">🎙</button>
+      ${i.kind==="approval"?`<button class="b" onclick="needsAnswer(${n},{verdict:'denied'})">Deny</button><button class="b primary" onclick="needsAnswer(${n},{verdict:'approved'})">Approve</button>`
+        :`${i.kind==="task"?`<button class="b" title="You did it: close the task" onclick="optimistic(this,()=>act('done',NEEDS[${n}].id),'Done')">✓ Done</button>`:""}<button class="b primary" onclick="needsAnswer(${n},{})">Send</button>`}</div></div>
+    </div></div>`).join("");
+}
+// Run in your terminal (hq.commands): copy as a shell line or as a Claude prompt; the text never goes into an onclick attribute
+let CMDS = [];
+function renderCommands(list){
+  CMDS = list; $("cmdCard").hidden = !list.length; $("cmdCount").textContent = list.length > 1 ? list.length : "";
+  const shell = c => { const i = c.shell.lastIndexOf("  # Atlas: "); return i < 0 ? esc(c.shell) : esc(c.shell.slice(0,i)) + `<span class="c">${esc(c.shell.slice(i))}</span>`; };
+  $("cmdList").innerHTML = list.map((c,n)=>`<div class="cmd">
+    <div class="title">${list.length>1?`${n+1}. `:""}${esc(c.title)}</div>
+    ${c.why?`<div class="meta">${esc(c.why)}</div>`:""}
+    <pre class="cmdline">${shell(c)}</pre>
+    <div class="btns" style="flex-wrap:wrap"><button class="b primary" onclick="copyCmd(${n},'shell')">Copy command</button>
+      <button class="b" title="A prompt with the context, for Claude Code" onclick="copyCmd(${n},'claude')">Copy for Claude</button>
+      <button class="b" title="You ran it" onclick="optimistic(this,()=>act('cmd_done',CMDS[${n}].id),'Marked as run')">✓ Done</button>
+      <button class="ed" title="No longer needed" onclick="optimistic(this,()=>act('cmd_dismiss',CMDS[${n}].id),'Dismissed')">Dismiss</button></div>
+    <div class="sub">added ${esc((c.created||"").replace("T"," ").slice(5,16))}${c.source?` by ${esc(c.source)}`:""}${c.cwd?` · runs in ${esc(c.cwd)}`:""}</div></div>`).join("");
+}
+// Stopped by a usage limit (hq.resume): one item per interrupted session; resume it, or start fresh with its context
+const TOOL = {claude:"Claude Code", codex:"Codex", devloop:"Atlas dev loop"};
+let INTR = [];
+function renderInterruptions(list){
+  INTR = list; $("intrCard").hidden = !list.length; $("intrCount").textContent = list.length > 1 ? list.length : "";
+  const when = t => esc((t||"").replace("T"," ").slice(5,16));
+  $("intrList").innerHTML = list.map((r,n)=>`<div class="cmd">
+    <div class="title"><span class="tool">${TOOL[r.tool]||esc(r.tool)}</span>${esc(r.project)}${r.objective?`: ${esc(r.objective.slice(0,160))}${r.objective.length>160?"…":""}`:""}</div>
+    <dl><dt>Stopped</dt><dd>${when(r.stopped_at)}${r.resets?` · limit resets ${esc(r.resets)}`:""}</dd>
+      ${r.files.length?`<dt>Changed</dt><dd>${r.files.slice(-5).map(f=>esc(f.split("/").slice(-2).join("/"))).join(", ")}${r.files.length>5?` +${r.files.length-5}`:""}</dd>`:""}
+      ${r.commits.length?`<dt>Commits</dt><dd>${r.commits.map(esc).join("; ")}</dd>`:""}
+      ${r.last_said?`<dt>Last said</dt><dd>${esc(r.last_said.slice(0,300))}${r.last_said.length>300?"…":""}</dd>`:""}</dl>
+    ${r.resume?`<pre class="cmdline">${esc(r.resume)}</pre>`:`<p class="meta">First in line: the builder continues this task from its checkpoint by itself once the limit has reset.</p>`}
+    <div class="btns" style="flex-wrap:wrap">${r.resume?`<button class="b primary" onclick="copyText(INTR[${n}].resume,'Copied. Paste it in Termius once the limit has reset.')">Copy resume command</button>`:""}
+      <button class="b" title="Everything Atlas knows, as a prompt for a fresh Claude session" onclick="copyText(INTR[${n}].context,'Copied. In Termius, type claude, then paste.')">Copy context</button>
+      <button class="b" title="The work is finished" onclick="optimistic(this,()=>act('intr_done',INTR[${n}].id),'Marked finished')">✓ Finished</button>
+      <button class="ed" title="Not needed any more" onclick="optimistic(this,()=>act('intr_dismiss',INTR[${n}].id),'Dismissed')">Dismiss</button></div></div>`).join("");
+}
+async function copyText(t, done){
+  let ok = false;
+  try { await navigator.clipboard.writeText(t); ok = true; } catch(e) {}
+  if (!ok) { const a = document.createElement("textarea"); a.value = t; a.style.position = "fixed"; a.style.opacity = "0";   // plain http (no clipboard API)
+    document.body.appendChild(a); a.select(); try { ok = document.execCommand("copy"); } catch(e) {} a.remove(); }
+  toast(ok ? done : "Copying failed: select the text and copy it by hand", 4000);
+}
+async function copyCmd(n, kind){
+  const t = CMDS[n][kind];
+  let ok = false;
+  try { await navigator.clipboard.writeText(t); ok = true; } catch(e) {}
+  if (!ok) { const a = document.createElement("textarea"); a.value = t; a.style.position = "fixed"; a.style.opacity = "0";   // plain http (no clipboard API)
+    document.body.appendChild(a); a.select(); try { ok = document.execCommand("copy"); } catch(e) {} a.remove(); }
+  toast(!ok ? "Copying failed: select the text and copy it by hand" : kind === "shell" ? "Copied. Paste it in Termius and press Enter."
+    : "Copied. In Termius, type claude, then paste.", 4000);
+}
+async function needsAnswer(n, extra){
+  const i = NEEDS[n], el = needsInput(i.key);
+  const r = await act("needs_answer", null, JSON.stringify({key: i.key, text: extra.text ?? (el ? el.value : ""), verdict: extra.verdict || ""}));
+  if (r) { if (el) el.value = ""; toast(r, 6000); }
+}
+function needsMic(n){
+  const mic = $("mic");
+  if (mic.disabled) { toast("Speech is not available here; your keyboard's mic works in the field.", 5000); return; }
+  micTarget = NEEDS[n].key; mic.click();
+}
+
+const fmtDay = iso => new Date(iso+"T12:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});
+const taskLine = (t, meta) => `<div class="row">
+  <div class="grow"><div class="title">${esc(t.title)}</div><div class="meta">#${t.id}${meta?` · ${meta}`:""}</div></div>${taskBtns(t.id)}</div>`;
+
+function renderProgress(P){
+  const delta = P.done_week - P.done_last_week;
+  const tile = (k,v,d) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+  $("tiles").innerHTML = tile("This week", P.done_week, `${delta>=0?"+":"−"}${Math.abs(delta)} vs last week`)
+    + tile("Today", P.done_today, `${P.added_week} added this week`)
+    + tile("Streak", `${P.streak}d`, `best ${P.best_streak}d`)
+    + tile("Open", P.open, `${P.done_total} done in total`);
+
+  const max = Math.max(1, ...P.daily.map(d=>d.done));
+  $("bars").innerHTML = '<div class="tip" id="tip"></div>' + P.daily.map((d,i)=>`<div class="col${d.date===P.today?" today":""}" data-i="${i}">
+    <div class="bar" style="height:${d.done? Math.max(4, 100*d.done/max):0}%"></div></div>`).join("");
+  const tip = $("tip");
+  $("bars").querySelectorAll(".col").forEach(c=>{
+    c.onmouseenter = c.ontouchstart = () => { const d = P.daily[+c.dataset.i];
+      tip.textContent = `${fmtDay(d.date)}: ${d.done} done`; tip.style.display="block";
+      tip.style.left = Math.min(Math.max(c.offsetLeft + c.offsetWidth/2, 60), c.parentNode.offsetWidth - 60) + "px";
+      tip.style.top = (c.offsetHeight - c.firstElementChild.offsetHeight) + "px"; };
+    c.onmouseleave = () => tip.style.display="none";
+  });
+  $("axis").innerHTML = `<span>${fmtDay(P.daily[0].date)}</span><span>max ${max}/day</span><span>Today</span>`;
+  $("dayTable").innerHTML = "<tr><th>Day</th><th>Done</th></tr>" + P.daily.slice().reverse().map(d=>`<tr><td>${fmtDay(d.date)}</td><td>${d.done}</td></tr>`).join("");
+
+  $("overdueCard").hidden = !P.overdue.length; $("overdueCount").textContent = P.overdue.length || "";
+  $("overdue").innerHTML = P.overdue.map(t=>taskLine(t, `${t.days_late} day${t.days_late===1?"":"s"} late (due ${t.due})`)).join("");
+  $("dueSoon").innerHTML = P.due_soon.map(t=>taskLine(t, `due ${fmtDay(t.due)}`)).join("") || empty("Nothing due this week.");
+  $("stalledCard").hidden = !P.stalled.length;
+  $("stalled").innerHTML = P.stalled.map(t=>taskLine(t, `last change ${t.updated.slice(0,10)}`)).join("");
+  $("recent").innerHTML = P.recent.map(t=>`<div class="row done"><div class="grow"><div class="title">${esc(t.title)}</div>
+    <div class="meta">${t.done_at.replace("T"," ").slice(0,16)}${t.model?` · ${modelWhy(t.model, t.model_reason)}`:""}</div></div><div class="btns"><button class="b" title="Undo" onclick="act('todo',${t.id})">Undo</button></div></div>`).join("") || empty("Nothing completed yet. Press Run on a task and the agent builds it.");
+  $("review").innerHTML = D.review ? `<div class="sub" style="margin-bottom:6px">${D.review.created.replace("T"," ").slice(0,16)}</div><div class="review">${esc(D.review.content)}</div>`
+    : empty("The first review is written on Sunday evening, or press Write now.");
+}
+const usd = v => `$${(+v||0).toFixed(2)}`;
+const tok = n => { n=+n||0; return n>=1e6?`${(n/1e6).toFixed(1)}M`:n>=1e3?`${Math.round(n/1e3)}k`:String(n); };
+const mins = s => s ? `${Math.max(1,Math.round(s/60))} min` : "";
+const modelWhy = (m, why) => m ? `model ${esc(m)}${why?` (${esc(why)})`:""}` : "";  // what routing chose and why (#69)
+const STATUS = {resolved:"resolved", closed:"PR closed", pr_open:"PR ready", merged:"merged", running:"running", no_changes:"no changes", tests_failed:"tests failed", failed:"failed", stopped:"stopped"};
+
+function renderAgent(A, U){
+  $("killedCard").hidden = !A.killed;
+  $("killBtn").hidden = A.killed;
+  const [label, cls] = A.killed ? ["killed","bad"] : !A.installed ? ["not installed","bad"] : !A.enabled ? ["off",""]
+    : A.paused ? ["paused",""] : A.current ? ["working","on"] : ["on","on"];
+  $("agentState").textContent = label; $("agentState").className = "state " + cls;
+  $("agentInfo").innerHTML = !A.installed ? "Claude Code is not installed on the Pi yet. See README → Dev loop."
+    : !A.enabled ? "Off. To switch it on, run on the Pi: <b>bash deploy/enable-devloop.sh</b>. You can still start single runs with Run now."
+    : `${A.runs_today}/${A.max_runs_per_day} runs today · every run: one task, max ${A.max_minutes} min / ${A.max_turns} turns, tests must pass, then a PR for you. It never merges.`;
+  const btn = (t, op, cls="") => `<button class="b ${cls}" onclick="act('${op}').then(r=>r&&toast(${JSON.stringify(t)}))">${t}</button>`;
+  $("agentBtns").innerHTML = A.killed ? "" : [
+    A.current ? btn("Stop this run","dev_stop","danger") : `<button class="b primary" onclick="runNow(this)">Run now</button>`,
+    A.enabled ? (A.paused ? btn("Resume","dev_resume") : btn("Pause","dev_pause")) : ""].join("");
+
+  $("agentInfo").innerHTML += A.last && !A.current ? `<div style="margin-top:6px">Last attempt ${esc(A.last.at.replace("T"," ").slice(5,16))}: ${esc(A.last.text.replace(/^Atlas dev loop: /,""))}</div>` : "";
+  renderLanes(A);
+  $("agentQueue").innerHTML = queueHTML(A, 50);
+
+  const scan = A.conflict_scan ? `Last scan ${A.conflict_scan.at.replace("T"," ").slice(5,16)}${A.conflict_scan.github?" (live on GitHub)":" (git only; GitHub not reachable)"}.` : "Not scanned yet.";
+  $("agentConflicts").innerHTML = (A.conflicts.length ? "" : `<div class="sub">No open PR conflicts with main. ${scan}</div>`) + A.conflicts.map(c=>`<div class="row"><div class="grow">
+    <div class="title">#${c.task_id} ${esc(c.title||"")} <span class="state bad">conflict</span></div>
+    <div class="meta">${c.files.map(esc).join(", ")}${c.pr_url?` · <a href="${esc(c.pr_url)}" target="_blank" rel="noopener">pull request</a>`:""}</div>
+    ${c.top?`<div class="meta">Part of the stack under #${c.top.task_id}: merging that PR also merges this one.</div>`:""}</div>
+    <button class="b primary" title="Merge main into this PR branch; the agent fixes the conflicts and runs the tests; you review the updated PR" onclick="resolveConflict(this, ${c.id})">Resolve</button></div>`).join("")
+    + (A.conflicts.length ? `<div class="sub" style="margin-top:6px">${scan}</div>` : "");
+  $("agentRuns").innerHTML = A.runs.map(r=>`<div class="row"><div class="grow">
+    <div class="title">#${r.task_id} ${esc(r.title||"")}${r.resolves?" · conflict fix":""}${r.status==="pr_open"&&r.conflict?' <span class="state bad">conflict</span>':""} <span class="state ${["pr_open","merged","resolved"].includes(r.status)?"on":["failed","tests_failed","stopped"].includes(r.status)?"bad":""}">${STATUS[r.status]||esc(r.status)}</span></div>
+    <div class="meta">${r.started.replace("T"," ").slice(5,16)}${r.seconds?` · ${mins(r.seconds)}`:""}${r.turns?` · ${r.turns} turns`:""}${r.model?` · <span title="${esc(r.model_reason||"")}">${esc(r.model)}</span>`:""}${r.cost_usd?` · ~${usd(r.cost_usd)}`:""}${r.pr_url?` · <a href="${esc(r.pr_url)}" target="_blank" rel="noopener">pull request</a>`:""}</div>
+    ${r.summary?`<details><summary class="sub" style="cursor:pointer">summary</summary><div class="review" style="margin-top:4px">${esc(r.summary)}</div></details>`:""}</div></div>`).join("")
+    || empty("No runs yet.");
+
+  const t = (k, a, h) => `<div class="tile"><div class="k">${k}</div><div class="v">${usd(a.cost_usd + h.cost_usd)}</div>
+    <div class="d">agent ${usd(a.cost_usd)} · ${a.runs} runs · ${tok(a.tokens_in+a.tokens_out)} tok<br>Atlas API ${usd(h.cost_usd)} · ${h.calls} calls · ${tok(h.tokens_in+h.tokens_out)} tok</div></div>`;
+  $("usageTiles").innerHTML = t("Today", U.agent.today, U.hq.today) + t("7 days", U.agent.week, U.hq.week) + t("30 days", U.agent.month, U.hq.month);
+  const B = U.budgets || [], over = B.filter(b => b.deferred);
+  $("budgetWarn").hidden = !over.length;
+  $("budgetWarn").textContent = over.length ? `Kept off paid models today (budget reached): ${over.map(b=>`${b.job} ×${b.deferred}`).join(", ")}. They used their rule or a local model instead.` : "";
+  $("budgetJobs").innerHTML = "<tr><th>Job</th><th>Paid calls today</th><th>Budget</th></tr>" + B.map(b=>
+    `<tr><td>${esc(b.job)}</td><td>${b.used}${b.deferred?` <span class="state bad">full</span>`:""}</td><td>${b.limit || "never paid"}</td></tr>`).join("");
+  $("usageNote").textContent = "Agent cost is what Claude Code reports (on a subscription: API-equivalent, not a bill). Atlas API cost uses the prices in [models] of the constitution; at 0 only tokens are counted.";
+  $("usageJobs").innerHTML = U.by_job.length ? "<tr><th>Atlas model calls, 30 days</th><th>Tier</th><th>Calls</th><th>Tokens</th><th>Cost</th></tr>"
+    + U.by_job.map(j=>`<tr><td>${esc(j.job)}</td><td>${esc(j.tier)}</td><td>${j.calls}</td><td>${tok(j.tokens_in+j.tokens_out)}</td><td>${usd(j.cost_usd)}</td></tr>`).join("") : "";
+}
+// Whisper setup (#71): pick a tier, connect it, test it. Keys go to .env on the Pi and are never shown again.
+let vTier = "";
+const VOICE_HELP = {
+  gpu: `Run an OpenAI-compatible Whisper server on the GPU PC (speaches / faster-whisper-server, port 8000; Ollama does not serve Whisper), then enter its Tailscale address. Free and private; works while the PC is on.`,
+  pi: `faster-whisper on the Pi itself: private and free, but slow (about as long as the recording, or longer). Used only when no GPU PC address is set.`,
+  cloud: `Any OpenAI-compatible speech-to-text service, e.g. https://api.openai.com or https://api.groq.com/openai. Costs money per minute of audio and sends your recordings to that provider.`};
+function renderVoice(V){
+  const T = V.tiers;
+  $("voiceState").textContent = V.active.length ? "on" : "browser speech"; $("voiceState").className = "state " + (V.active.length ? "on" : "");
+  const used = [T.gpu.configured ? "the GPU PC" : T.pi.configured ? "the Pi CPU" : "", T.cloud.configured ? "the hosted API" : ""].filter(Boolean);
+  $("voiceNow").textContent = used.length ? `Talk and Telegram voice notes use ${used.join(", then ")}. The Telegram bot picks up changes after its next restart.`
+    : "No Whisper tier yet: Talk uses your browser's speech recognition. Pick a tier to connect one.";
+  if (!vTier) vTier = T.gpu.configured ? "gpu" : T.cloud.configured ? "cloud" : T.pi.configured ? "pi" : "gpu";
+  $("voiceTiers").innerHTML = ["gpu","pi","cloud"].map(k=>`<button class="${k===vTier?"on":""}" onclick="vTier='${k}';voicePanel()">${T[k].configured?"● ":""}${esc(T[k].label)}</button>`).join("");
+  if (renderVoice.tier !== vTier) return voicePanel();   // the panel is rebuilt only on a tier switch, so typing survives the 60 s refresh
+  const c = T[vTier].check;
+  $("voiceCheck").innerHTML = c ? `<span style="color:var(${c.ok?"--accent":"--warn"})">${c.ok?"✓":"✗"}</span> ${esc(c.message)} <span class="sub">${esc(c.at.replace("T"," ").slice(5,16))}</span>` : "Not tested yet.";
+}
+function voicePanel(){
+  const t = D.voice.setup.tiers[vTier]; renderVoice.tier = vTier;
+  const test = `<button type="button" class="b" onclick="voiceTest(this)">Test</button>`;
+  let h = `<div class="sub">${VOICE_HELP[vTier]}</div>`;
+  if (vTier === "pi") {
+    h += t.configured ? `<div class="meta" style="margin-top:8px">faster-whisper is installed · model ${esc(t.model)}${t.used?"":" · not used while a GPU PC address is set"}</div>`
+      : `<label>Not installed. Run this once on the Pi, then restart Atlas:</label><pre class="log">${esc(t.install)}</pre>`;
+    h += `<div class="bar2">${t.configured ? test : ""}</div>`;
+  } else {
+    h += `<label for="vUrl">${vTier==="gpu"?"Whisper server address":"Service address (without /v1)"}</label>
+      <input id="vUrl" value="${esc(t.url||"")}" placeholder="${vTier==="gpu"?"http://100.x.y.z:8000":"https://api.openai.com"}" autocomplete="off">`;
+    if (vTier === "cloud") h += `<label for="vKey">API key</label><input id="vKey" type="password" autocomplete="off" placeholder="${t.key_set?"saved on the Pi; leave empty to keep it":"paste the key"}">`;
+    h += `<div class="meta" style="margin-top:6px">Model ${esc(t.model)} (set in the constitution)</div>
+      <div class="bar2"><button type="button" class="b primary" onclick="voiceSave(this)">Save</button>${t.configured?test:""}${t.configured?`<button type="button" class="b" onclick="voiceSave(this,true)">Remove</button>`:""}</div>`;
+  }
+  $("voicePanel").innerHTML = h;
+  renderVoice(D.voice.setup);
+}
+async function voiceSave(btn, remove){
+  if (remove && !confirm("Disconnect this tier? Its address" + (vTier==="cloud" ? " and key are" : " is") + " cleared on the Pi.")) return;
+  const url = remove ? "" : document.getElementById("vUrl").value.trim(), key = remove || vTier !== "cloud" ? "" : document.getElementById("vKey").value.trim();
+  btn.disabled = true; setupMic.done = false;   // Talk switches between Whisper and browser speech on the next load
+  const r = await act("voice_save", null, JSON.stringify({tier: vTier, url, key}));
+  btn.disabled = false; if (r) { toast(r, 4000); voicePanel(); }
+}
+async function voiceTest(btn){
+  if (vTier === "cloud" && !confirm("Send a one-second silent test clip to the hosted service? This may cost a fraction of a cent.")) return;
+  btn.disabled = true; btn.textContent = "Testing…";
+  const r = await act("voice_test", null, vTier);
+  btn.disabled = false; btn.textContent = "Test";
+  if (r) toast(JSON.parse(r).message, 6000);
+}
+async function runNow(btn){
+  btn.disabled = true; btn.textContent = "Starting…";
+  const r = await act("dev_run");            // a reason why it cannot start comes back as a message
+  if (!r) { btn.disabled = false; btn.textContent = "Run now"; return; }
+  toast("Run started");
+  for (let i = 0; i < 10; i++) { await new Promise(res => setTimeout(res, 3000)); await load(); if (D.agent.current) break; }
+}
+async function resolveConflict(btn, id){
+  if (!confirm("Resolve: merge main into this PR branch and let the agent fix the conflicts? The PR is updated only when the tests pass; you review it.")) return;
+  btn.disabled = true; btn.textContent = "Starting…";
+  const r = await act("dev_resolve", id);
+  if (!r) { btn.disabled = false; btn.textContent = "Resolve"; return; }
+  toast(r, 6000);
+  for (let i = 0; i < 10; i++) { await new Promise(res => setTimeout(res, 3000)); await load(); if (D.agent.current) break; }
+}
+async function checkConflicts(btn){
+  btn.disabled = true; btn.textContent = "Scanning…";
+  const r = await act("dev_conflicts"); btn.disabled = false; btn.textContent = "Scan for conflicts";
+  if (r) { toast(r, 6000); await load(); }
+}
+async function killSwitch(){
+  if (!confirm("Kill switch: stop the agent now, block new runs and all paid model calls?")) return;
+  const r = await act("kill"); if (r) toast("Kill switch on");
+}
+
+const MK = {doing:"▶", todo:"○", blocked:"⏸", proposed:"?"};
+function flatGoals(gs, out=[]){ gs.forEach(g=>{ out.push(g); flatGoals(g.children, out); }); return out; }
+function goalSelect(current, onchange, exclude){
+  const all = flatGoals(D.plan.goals).filter(g=>g.id!==exclude);
+  return `<select class="mini" onchange="${onchange}" onclick="event.stopPropagation()">${[`<option value="">${exclude?"top level":"link to goal…"}</option>`]
+    .concat(all.map(g=>`<option value="${g.id}" ${g.id===current?"selected":""}>${"— ".repeat(g.depth)}${esc(g.title).slice(0,50)}</option>`)).join("")}</select>`;
+}
+// this week's movement per goal, from hq.progress (shown in the goal tree instead of a second goal list)
+function goalWeek(id){ const p = D.progress.goals.find(x=>x.id===id); if (!p) return "";
+  return `${p.done_week?` · +${p.done_week} this week`:""}${p.overdue?` · <span style="color:var(--warn)">${p.overdue} overdue</span>`:""}`; }
+function goalHTML(g){
+  const row = t => `<div class="t">
+    <span class="mk">${MK[t.status]||"·"}</span><span class="grow">${esc(t.title)} <span class="sub">#${t.id} · ${esc(t.owner)}${t.due?` · due ${t.due}`:""}</span></span>
+    ${t.owner==="ai"?`<span class="sub" title="In the agent's build queue">in Build</span>`:`<button class="ed" title="Plan → Build: put it in the agent's build queue" onclick="act('task_owner',${t.id},'ai').then(r=>r&&toast('In the build queue'))">→ Build</button>`}
+    <button class="ed" title="Edit" onclick="openEdit('tasks',${t.id})">✎</button></div>`;
+  const tasks = g.tasks.slice(0,5).map(row).join("") + (g.tasks.length > 5
+    ? `<details><summary class="sub" style="cursor:pointer;padding:2px 0 2px 26px">${g.tasks.length-5} more open tasks</summary>${g.tasks.slice(5).map(row).join("")}</details>` : "");
+  const done = g.done_count ? `<div class="sub" style="padding:2px 0">✓ ${g.done_count} done${g.recent_done.length?` · latest: ${g.recent_done.map(esc).join(", ")}`:""}</div>` : "";
+  return `<details class="goal d${Math.min(g.depth,1)}" ${g.depth<2?"open":""}><summary>
+    <div class="head"><span class="title"><b>${esc(g.title)}</b> ${g.children.length || g.total >= 3 ? `<span class="tag proj" title="A goal with several tasks or sub-goals: a project">project</span>` : ""}<span class="tag">${esc(g.horizon)}</span></span><span class="sub">${g.done}/${g.total}${goalWeek(g.id)}</span></div>
+    <div class="track" style="margin:6px 0 4px"><div class="fill" style="width:${g.pct}%"></div></div>
+    ${g.why?`<div class="meta">${esc(g.why)}</div>`:""}</summary>
+    <div class="sub" style="margin:2px 0 4px">goal #${g.id} · under: ${goalSelect(g.parent_id, `act('nest',${g.id},this.value)`, g.id)} <button class="ed" onclick="openEdit('goals',${g.id})">✎ Edit goal</button></div>
+    ${tasks || (g.children.length?"":empty("No open tasks."))}${done}${g.children.map(goalHTML).join("")}</details>`;
+}
+function renderPlan(P){
+  const fits = {}; (D.ideas||[]).forEach(i=>{ if (i.gate==="idea" && i.place && i.place.goal_id) fits[i.place.goal_id] = (fits[i.place.goal_id]||0) + 1; });
+  const fitsAll = g => (fits[g.id]||0) + g.children.reduce((a,c)=>a+fitsAll(c),0);
+  $("goals").innerHTML = P.goals.map(g=>`<div class="card goalcard">${goalHTML(g)}${fitsAll(g)?`<button class="fitchip" onclick="setTab('brain')">${icon("brain")}${fitsAll(g)} idea${fitsAll(g)>1?"s":""} would fit here</button>`:""}</div>`).join("")
+    || empty('No goals yet. Add one with + Goal, or start one from an idea.');
+  $("looseCard").hidden = !P.loose.length;
+  $("loose").innerHTML = P.loose.map(t=>`<div class="row"><div class="grow"><div class="title">${esc(t.title)}</div>
+    <div class="meta">#${t.id} · ${esc(t.owner)} · phase ${t.phase}${t.due?` · due ${t.due}`:""}</div></div>
+    <div class="btns"><button class="ed" title="Edit" onclick="openEdit('tasks',${t.id})">✎</button>${goalSelect(null, `act('attach',${t.id},this.value).then(r=>r&&toast('Linked'))`)}</div></div>`).join("");
+}
+
+// ---------------- All: every task and idea, filtered on the server (hq.overview) ----------------
+let taskSearchTimer, taskSearchSequence = 0, STAGE = '';
+function pickStage(k){ STAGE = STAGE===k ? '' : k; if(STAGE) $('fStatus').value=''; loadAll(); }
+function scheduleTaskSearch(){ clearTimeout(taskSearchTimer); taskSearchTimer=setTimeout(loadAll,250); }
+function resetTaskFilters(){
+  for (const id of ['fSearch','fStatus','fDue','fGoal','fCreatedFrom','fCreatedTo','fRecommendation']) $(id).value='';
+  STAGE='';
+  $('fSort').value='priority'; loadAll();
+}
+async function loadAll(){
+  const sequence = ++taskSearchSequence;
+  const g = $("fGoal"), cur = g.value;
+  g.innerHTML = `<option value="">any goal</option><option value="0">no goal</option>` + flatGoals(D.plan.goals)
+    .map(x=>`<option value="${x.id}">${"— ".repeat(x.depth)}${esc(x.title).slice(0,50)}</option>`).join("");
+  g.value = [...g.options].some(o=>o.value===cur) ? cur : "";
+  const st = $("fStatus").value, p = new URLSearchParams();
+  if (st === "all") p.set("all", "1"); else if (st) p.set("status", st);
+  if (g.value) p.set("goal", g.value);
+  if ($("fDue").value) p.set("due", $("fDue").value);
+  if (STAGE) p.set("stage", STAGE);
+  $("filterCount").textContent = ['fGoal','fDue','fRecommendation','fCreatedFrom','fCreatedTo'].filter(id=>$(id).value).length || "";
+  for (const [key,id] of [['search','fSearch'],['sort','fSort'],['created_from','fCreatedFrom'],['created_to','fCreatedTo'],['recommendation','fRecommendation']]) if($(id).value) p.set(key,$(id).value);
+  let O;
+  try { const r = await fetch("/api/overview?"+p, {headers:H()}); O = await r.json(); }
+  catch (e) { if(sequence === taskSearchSequence) $("allList").innerHTML = empty("Could not load tasks. Is Atlas running?"); return; }
+  if(sequence !== taskSearchSequence) return;
+  if (O.error) { $("allList").innerHTML = empty(esc(O.error)); return; }
+  renderAll(O);
+}
+function renderDelivery(O){
+  const L = (O.delivery||[]).filter(x=>x.key!=="dropped"), total = L.reduce((a,x)=>a+x.count,0);
+  if (!total) { $("delivery").innerHTML = ""; return; }
+  const n = k => (L.find(x=>x.key===k)||{count:0}).count, left = total - n("live");
+  const sum = `<p class="dlvsum"><b>${n("live")}</b> of ${total} installed and live · <b>${n("install")+n("review")}</b> built, not installed yet · <b>${left-n("install")-n("review")}</b> still to build</p>`;
+  const bar = L.filter(x=>x.count).map(x=>`<button style="--c:var(--st-${x.key});flex:${x.count}" title="${esc(x.label)}: ${x.count}" aria-label="${esc(x.label)}: ${x.count}. Show these" onclick="pickStage('${x.key}')"></button>`).join("");
+  const legend = L.map(x=>`<button class="${STAGE===x.key?"on":""}${x.count?"":" zero"}" aria-pressed="${STAGE===x.key}" onclick="pickStage('${x.key}')"><span class="sw" style="--c:var(--st-${x.key})"></span>${esc(x.label)} <b>${x.count}</b></button>`).join("");
+  $("delivery").innerHTML = sum + `<div class="dlv" role="group" aria-label="Delivery bar">${bar}</div><div class="dlvlegend">${legend}${STAGE?`<button onclick="pickStage('')">✕ Show all stages</button>`:""}</div>`;
+}
+function renderAll(O){
+  renderDelivery(O);
+  const c = O.counts, ref = ids => ids.map(i=>`#${i}`).join(", ");
+  $("allCounts").textContent = `· showing ${O.tasks.length} tasks · ${O.ideas.length} ideas` + (O.stage ? ` · ${(O.delivery.find(x=>x.key===O.stage)||{}).label||""}` : "");
+  let html = "", last = null;
+  O.tasks.forEach(t=>{
+    if (O.sort === "status" && t.status !== last) { last = t.status; html += `<h2 style="margin:14px 0 2px">${esc(t.status)} <span class="sub">${O.tasks.filter(x=>x.status===last).length}</span></h2>`; }
+    const meta = [`#${t.id}`, esc(t.status), `created ${esc(t.created ? t.created.slice(0,10) : "date unknown")}`, `priority ${(+t.score).toFixed(2)}`, esc(t.owner), t.goal?esc(t.goal):"no goal", t.due?`<span style="${t.overdue?"color:var(--warn)":""}">due ${t.due}${t.overdue?" (overdue)":""}</span>`:"",
+      t.blocked_by.length?`waits on ${ref(t.blocked_by)}`:"", t.blocks.length?`blocks ${ref(t.blocks)}`:"", modelWhy(t.model, t.model_reason)].filter(Boolean).join(" · ");
+    html += `<div class="row"><div class="grow"><div class="title">${esc(t.title)}</div><div class="meta"><span class="stage"><span class="sw" style="--c:var(--st-${t.stage})"></span>${esc(t.stage_label)}</span>${meta}</div><div class="meta">${t.recommended?"★ Recommended now · ":""}${esc(t.recommendation_reason)}</div></div>
+      <div class="btns"><button class="b" onclick="openTaskDetail(${t.id})">Why this?</button>${["todo","blocked","proposed"].includes(t.status)&&t.owner!=="ai"?`<button class="b" title="Plan → Build: put it in the agent's build queue" onclick="act('task_owner',${t.id},'ai').then(r=>r&&(toast('In the build queue'),loadAll()))">→ Build</button>`:""}${["todo","blocked","proposed"].includes(t.status)?`<button class="b" title="Build it right now" onclick="runTask(this,${t.id})">▶ Build now</button>`:""}${t.status==="todo"||t.status==="doing"?`<button class="ed" title="Move up" onclick="act('move_up',${t.id}).then(r=>r&&toast(r))">↑</button><button class="ed" title="Move down" onclick="act('move_down',${t.id}).then(r=>r&&toast(r))">↓</button>`:""}<button class="ed" title="Edit" onclick="openEdit('tasks',${t.id})">✎</button></div></div>`;
+  });
+  if (O.ideas.length) html += `<h2 style="margin:14px 0 2px">ideas <span class="sub">${O.ideas.length}</span></h2>` + O.ideas.map(i=>`<div class="row"><div class="grow">
+    <div class="title">${esc(i.title)}</div><div class="meta">#${i.id} · created ${esc(i.created ? i.created.slice(0,10) : "date unknown")} · <span class="tag">${esc(i.category)}</span>${i.gate==="promoted"?`→ task #${i.task_id}`:esc(i.gate)} · score ${(+i.score).toFixed(2)}</div></div>
+    <div class="btns"><button class="ed" title="Edit" onclick="openEdit('ideas',${i.id})">✎</button></div></div>`).join("");
+  $("allList").innerHTML = html || empty("Nothing matches these filters.");
+}
+
+async function openUpdates(){
+  $("updBody").innerHTML = `<div class="sub">Running ${esc(D.version.sha)} from ${esc(D.version.date)} · checking GitHub…</div>`;
+  const r = await act("update_check"); if (!r) { $("updBody").innerHTML = empty("Could not check."); return; }
+  const u = JSON.parse(r);
+  const list = u.commits.map(c=>`<div class="t" style="display:flex;gap:8px;padding:3px 0;font-size:14px"><span class="sub">${esc(c.sha)}</span><span>${esc(c.subject)}</span></div>`).join("");
+  $("updBody").innerHTML = `<div class="sub">Running ${esc(u.current.sha)} (${esc(u.current.date)}): ${esc(u.current.subject)}</div>`
+    + (!u.behind ? `<div style="margin-top:8px">Atlas is up to date. New merges install by themselves within 15 minutes.</div>`
+      : `<div style="margin:10px 0 4px"><b>${u.behind} new change${u.behind>1?"s":""} on GitHub</b></div>${list}`
+        + (u.blocker ? `<div class="card alert" style="margin:10px 0 0">${esc(u.blocker)}</div>`
+          : `<div class="bar2"><button class="b primary" onclick="installUpdate(this)">Install and restart</button>
+             <span class="sub" style="align-self:center">Tests run first; nothing is installed if they fail.</span></div>`));
+}
+async function installUpdate(btn){
+  const old = D.version.sha;              // before the install: act() reloads the data afterwards
+  btn.disabled = true; btn.textContent = "Testing and installing…";
+  const r = await act("update_apply"); if (!r) { btn.disabled = false; btn.textContent = "Install and restart"; return; }
+  const u = JSON.parse(r);
+  $("updBody").innerHTML = `<div class="review">${esc(u.message)}</div>`;
+  if (u.status !== "updated") return;
+  for (let i = 0; i < 30; i++) {           // wait for the restarted dashboard, then reload the new page
+    await new Promise(res => setTimeout(res, 2000));
+    try { const x = await fetch("/api/data",{headers:H()}); if (x.ok && (await x.json()).version.sha !== old) { location.reload(); return; } } catch(e) {}
+  }
+  toast("Restart is taking long; reload the page in a moment");
+}
+
+// ---------------- Build path: the skill tree ----------------
+const STATE_TEXT = {unlocked:"unlocked", building:"building", available:"ready to build", locked:"locked"};
+let SEL = null;  // selected capability id
+function wrapLabel(t, n=17){ const w = t.split(" "), out=[""]; for (const x of w){ if ((out[out.length-1]+" "+x).trim().length > n && out[out.length-1]) out.push(x); else out[out.length-1] = (out[out.length-1]+" "+x).trim(); } return out.slice(0,2).map((l,i)=> i===1 && out.length>2 ? l.slice(0,n-1)+"…" : l); }
+let SHOW_BUILT = false; try { SHOW_BUILT = localStorage.getItem("hq.built") === "1"; } catch(e) {}
+function toggleBuilt(){ SHOW_BUILT = !SHOW_BUILT; try{localStorage.setItem("hq.built", SHOW_BUILT?"1":"0");}catch(e){} renderBuild(D.tree); }
+function visibleTree(T){
+  // future path (default): what is still to build; the full tree also shows what is built
+  const ns = SHOW_BUILT ? T.nodes : T.nodes.filter(n=>n.state!=="unlocked");
+  const vis = new Set(ns.map(n=>n.id)), memo = {};
+  const depth = (n, seen=new Set()) => { if (memo[n.id] !== undefined) return memo[n.id];
+    const reqs = n.requires.filter(r=>vis.has(r) && !seen.has(r)).map(r=>T.nodes.find(x=>x.id===r));
+    return memo[n.id] = reqs.length ? 1 + Math.max(...reqs.map(r=>depth(r, new Set([...seen, n.id])))) : 0; };
+  return ns.map(n=>({...n, d: depth(n)}));
+}
+function layoutTree(T, ns){
+  const narrow = window.innerWidth < 560, COLW = narrow ? 112 : 140, ROWH = 64, PADL = narrow ? 18 : 40, PADT = 8;
+  const pos = {}, lanes = [];
+  let y = PADT;
+  // Data can outlive the code that introduced a branch (e.g. after a rollback).
+  // Give every node a lane, including branches unknown to this page/server.
+  const branches = [...T.branches], known = new Set(branches.map(b=>b.key));
+  ns.forEach(n=>{ if (!known.has(n.branch)) {
+    known.add(n.branch); branches.push({key:n.branch, title:n.branch || "Other capabilities"});
+  }});
+  branches.forEach(b=>{
+    const lane = ns.filter(n=>n.branch===b.key).sort((a,c)=>a.d-c.d||a.id-c.id);
+    if (!lane.length) return;
+    const taken = new Set(); let rows = 1;
+    lane.forEach(n=>{ let r = 0; while (taken.has(r+":"+n.d)) r++; taken.add(r+":"+n.d); rows = Math.max(rows, r+1);
+      pos[n.id] = {x: PADL + 34 + n.d*COLW, y: y + 36 + r*ROWH}; });   // lane title on its own line above
+    lanes.push({title:b.title, y, h: rows*ROWH + 14}); y += rows*ROWH + 20;
+  });
+  const maxD = Math.max(0, ...ns.map(n=>n.d));
+  const fit = ($("tree").parentNode.clientWidth || 0) - 2;
+  return {pos, lanes, W: Math.max(fit, PADL + 34 + maxD*COLW + 90), H: y + 4};
+}
+function renderTree(T){
+  const ns = visibleTree(T), L = layoutTree(T, ns), byId = Object.fromEntries(T.nodes.map(n=>[n.id,n]));
+  const nextNode = T.plan.next_id ? T.nodes.find(n=>n.tasks.some(t=>t.id===T.plan.next_id)) : null;
+  const edges = ns.flatMap(n=>n.requires.filter(r=>L.pos[r]).map(r=>{ const a=L.pos[r], b=L.pos[n.id], mx=(a.x+b.x)/2;
+    const cls = n.state==="locked" ? "edge" : byId[r].state==="unlocked" && n.state==="unlocked" ? "edge done" : "edge on";
+    return `<path class="${cls}" d="M${a.x+14},${a.y} C${mx},${a.y} ${mx},${b.y} ${b.x-14},${b.y}"/>`; })).join("");
+  // in the future view, nodes whose foundations are all built get a short stub from the left: "built ✓"
+  const stubs = SHOW_BUILT ? "" : ns.filter(n=>n.d===0 && n.requires.length).map(n=>{ const {x,y}=L.pos[n.id];
+    return `<path class="edge on" d="M${x-44},${y} L${x-14},${y}"/><circle cx="${x-46}" cy="${y}" r="3" style="fill:var(--accent)"/>`; }).join("");
+  const nodes = ns.map(n=>{ const {x,y} = L.pos[n.id], r = n.state==="unlocked" ? 12 : 15;
+    const pct = n.total ? n.done/n.total : 0, C = 2*Math.PI*(r+4);
+    const glyph = n.state==="unlocked" ? "✓" : n.state==="locked" ? "🔒" : n.state==="building" ? `${Math.round(pct*100)}` : "+";
+    const seeds = n.ideas.slice(0,3).map((_,k)=>`<circle class="seed" cx="${x+r+6+k*9}" cy="${y-r-2}" r="4"/>`).join("")
+      + (n.ideas.length ? `<text class="g" x="${x+r+6+Math.min(n.ideas.length,3)*9}" y="${y-r+1}" style="font-size:10px">${n.ideas.length}</text>` : "");
+    return `<g class="node ${n.state} ${n.id===SEL?"sel":""}" onclick="selectNode(${n.id})" tabindex="0" onkeydown="if(event.key==='Enter')selectNode(${n.id})">
+      <title>${esc(n.title)} · ${STATE_TEXT[n.state]}${n.total?` · ${n.done}/${n.total} tasks`:""}${n.ideas.length?` · ${n.ideas.length} idea(s)`:""}</title>
+      ${n.state==="available"?`<circle class="halo" cx="${x}" cy="${y}" r="${r+8}"/>`:""}
+      <circle class="c" cx="${x}" cy="${y}" r="${r}"/>
+      ${n.state==="building"?`<circle class="arc" cx="${x}" cy="${y}" r="${r+4}" stroke-dasharray="${(C*Math.max(pct,.04)).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 ${x} ${y})"/>`:""}
+      <text class="g" x="${x}" y="${y+4}" text-anchor="middle" style="font-size:${n.state==="building"?10:n.state==="locked"?10:12}px">${glyph}</text>
+      ${nextNode&&nextNode.id===n.id?`<text class="nextmark" x="${x-r-5}" y="${y-r+3}" text-anchor="middle">★</text>`:""}${seeds}
+      ${wrapLabel(n.title).map((l,i)=>`<text x="${x}" y="${y+r+13+i*12}" text-anchor="middle">${esc(l)}</text>`).join("")}</g>`; }).join("");
+  const lanes = L.lanes.map((l,i)=>`${i%2?`<rect class="band" x="0" y="${l.y}" width="${L.W}" height="${l.h}" rx="8"/>`:""}
+    <text class="lane" x="6" y="${l.y+14}">${esc(l.title)}</text>`).join("");
+  const svg = $("tree"); svg.setAttribute("width", L.W); svg.setAttribute("height", L.H); svg.setAttribute("viewBox", `0 0 ${L.W} ${L.H}`);
+  svg.innerHTML = ns.length ? lanes + stubs + edges + nodes
+    : `<text x="10" y="30">Everything in the tree is built. Add a capability to grow it.</text>`;
+  if (SHOW_BUILT && !renderTree.scrolled) {   // full tree: start at the frontier rather than at the roots
+    const f = ns.filter(n=>n.state!=="unlocked").map(n=>L.pos[n.id].x);
+    const box = $("tree").parentNode;
+    if (f.length && Math.min(...f) > box.clientWidth - 80) box.scrollLeft = Math.min(...f) - 120;  // only when off-screen
+    renderTree.scrolled = true;
+  }
+}
+function selectNode(id){ SEL = SEL===id ? null : id; renderTree(D.tree); renderNodePanel(); }
+function renderNodePanel(){
+  const n = D.tree.nodes.find(n=>n.id===SEL); $("nodePanel").hidden = !n; if (!n) return;
+  const req = n.requires.map(r=>D.tree.nodes.find(x=>x.id===r)).filter(Boolean);
+  const tRow = t => `<div class="row"><div class="grow"><div class="title" style="font-weight:400">${t.status==="done"?"✓ ":""}${esc(t.title)}</div>
+    <div class="meta">#${t.id} · ${esc(t.owner)} · ${t.status==="proposed"?"draft, not queued yet":esc(t.status)}${t.pr?" · PR open":""}</div></div>
+    <div class="btns"><button class="ed" onclick="openEdit('tasks',${t.id})">✎</button>${t.status==="proposed"?`<button class="b" title="Edit the draft, then Save & queue" onclick="openEdit('tasks',${t.id})">Queue…</button>`:t.status!=="done"&&t.owner!=="ai"?`${t.owner==="me"?`<button class="b" title="You did this yourself" onclick="act('done',${t.id}).then(r=>r&&toast(r))">✓ I did it</button>`:""}<button class="b" title="Hand it to the agent" onclick="act('run',${t.id}).then(r=>r&&toast(r))">▶ Run</button>`:""}</div></div>`;
+  const iRow = i => `<div class="row"><div class="grow"><div class="title" style="font-weight:400">💡 ${esc(i.title)}</div><div class="meta">idea #${i.id} · ${esc(i.category)}</div></div>
+    <div class="btns"><button class="ed" onclick="openEdit('ideas',${i.id})">✎</button><button class="b" onclick="act('idea_task',${i.id},'ai').then(r=>r&&toast(r))">→ AI task</button></div></div>`;
+  $("nodePanel").innerHTML = `<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+      <div><div class="title">${esc(n.title)} <span class="state ${n.state==="unlocked"||n.state==="building"?"on":""}">${STATE_TEXT[n.state]}</span></div>
+      <div class="meta">${esc(n.description)}</div>
+      <div class="meta">${req.length?`needs: ${req.map(r=>`${r.state==="unlocked"?"✓":"○"} ${esc(r.title)}`).join(" · ")}`:"a root of the tree"}${n.total?` · ${n.done}/${n.total} tasks done`:""}</div></div>
+      <button class="ed" title="Edit" onclick="openEdit('capabilities',${n.id})">✎ Edit</button></div>
+    ${proofHTML(n)}
+    ${n.tasks.map(tRow).join("") || `<div class="empty">No tasks yet.${n.state==="available"?" Add one to start building it.":""}</div>`}
+    ${n.ideas.map(iRow).join("")}
+    ${researchHTML(n.id)}
+    <div class="bar2"><button class="b primary" title="A draft task for the agent that builds this; edit it, then Save &amp; queue" onclick="queueNode(${n.id})">▶ Queue this</button>
+      <button class="b" title="Look for existing tools, your own code and a build plan; Claude compares them" onclick="researchNode(${n.id})">🔍 Research how</button>
+      <button class="b" onclick="openNew('tasks',{capability_id:${n.id}})">+ My task here</button>
+      <button class="b" onclick="openNew('ideas',{capability_id:${n.id}})">+ Idea here</button>
+      <button class="b" onclick="openNew('capabilities',{requires:'${n.id}',branch:'${n.branch}'})">+ Unlocks next</button></div>`;
+}
+// Proof: how sure Atlas is that you have this capability (evidence only: done work, merged code; never "a library is installed")
+const PROOF_CLS = {confirmed:"on", partial:"", suggested:"", none:""};
+function proofHTML(n){
+  const ev = (n.evidence||[]).map(e=>`${esc(e.ref)} ${esc(e.title)}${e.prs.length?` (${e.prs.map(esc).join(", ")})`:""}`);
+  const sug = (n.suggested||[]).map((x,i)=>`<div class="row"><div class="grow"><div class="title" style="font-weight:400">Proof? ${esc(x.ref)} ${esc(x.title)}</div>
+      <div class="meta">built work that looks like this skill (not linked to it, so not verified)</div></div>
+      <div class="btns"><button class="b" onclick="optimistic(this,()=>act('node_proof_dismiss',${n.id},${JSON.stringify(x.ref).replace(/"/g,"&quot;")}),'Not counted as proof')">Not proof</button>
+      <button class="b primary" onclick="optimistic(this,()=>act('node_confirm',${n.id},${JSON.stringify(x.ref).replace(/"/g,"&quot;")}),'Marked as built')">✓ I have this</button></div></div>`).join("");
+  return `<div class="meta" style="margin:6px 0"><span class="state ${PROOF_CLS[n.proof]||""}">${esc(n.proof_text||"")}</span>
+      ${n.proof==="confirmed"?"":n.proof==="partial"?"some of its work is done":n.proof==="suggested"?"inferred from built work: confirm or dismiss below":"no done work or merged code for it yet"}
+      ${ev.length?`<br>Evidence: ${ev.join(" · ")}`:""}
+      ${n.proof!=="confirmed"&&n.proof!=="suggested"?` <button class="ed" title="You already have this capability: mark it built (undoable)" onclick="optimistic(null,()=>act('node_confirm',${n.id},''),'Marked as built')">I already have this</button>`:""}</div>${sug}`;
+}
+// Research on a node: ways to build it (GitHub tools, your arsenal, building it), compared by Claude; one becomes a draft
+const RES = {}, KIND = {build:"Build it in Atlas", reuse:"Reuse your code", adopt:"Existing tool"};
+function researchHTML(cid){
+  if (!(cid in RES)) { RES[cid] = null; call("research_last", cid).then(r=>{ RES[cid] = r ? JSON.parse(r) : null; if (SEL===cid && RES[cid]) renderNodePanel(); }); return ""; }
+  const r = RES[cid]; if (!r) return "";
+  if (r.busy) return `<div class="empty">Researching… GitHub, your arsenal and Claude (up to a minute).</div>`;
+  const opt = (o, i) => `<div class="row"><div class="grow"><div class="title" style="font-weight:400">${i===r.recommended?'<span class="star">★</span> ':""}${esc(o.title)}</div>
+    <div class="meta"><span class="tag">${KIND[o.kind]}</span> ~${o.effort_h} h${o.source?` · <a href="${esc(o.source)}" target="_blank" rel="noopener noreferrer">${esc(o.source.replace("https://github.com/",""))}</a> · needs your approval`:""}</div>
+    ${o.why?`<div class="meta">${esc(o.why)}</div>`:""}${o.steps.length?`<div class="meta">${o.steps.map(esc).join(" → ")}</div>`:""}</div>
+    <div class="btns"><button class="b${i===r.recommended?" primary":""}" title="A draft task from this option; edit it, then Save &amp; queue" onclick="pickResearch(${r.id},${i})">Use this…</button></div></div>`;
+  return `<div class="title" style="margin-top:12px">How to build it <span class="meta">research #${r.id}${r.task_id?` · picked → draft #${r.task_id}`:""}</span></div>
+    <div class="meta">${esc(r.summary)}</div>${r.options.map(opt).join("")}`;
+}
+async function researchNode(cid){
+  RES[cid] = {busy:true}; renderNodePanel();
+  const r = await call("node_research", cid); RES[cid] = r ? JSON.parse(r) : null; renderNodePanel();
+}
+async function pickResearch(rid, i){
+  const id = await call("research_pick", rid, String(i)); if (!id) return;
+  for (const k in RES) if (RES[k] && RES[k].id===rid) RES[k].task_id = +id;
+  await openEdit("tasks", +id); load();
+}
+const GATE = {approved:"✓ approved", pending:"waiting for your OK", denied:"you said not now"};
+function renderBuild(T){
+  const c = T.counts;
+  $("treeCounts").textContent = `· ${c.unlocked} unlocked · ${c.building} building · ${c.available} ready`;
+  $("focusSeg").innerHTML = [["management","Management agent"],["plan","Plan"],["balanced","Balanced"],["ideas","Ideas"]].map(([k,l])=>
+    `<button class="${T.focus===k?"on":""}" onclick="act('build_focus',null,'${k}').then(r=>r&&toast(r,3000))">${l}</button>`).join("");
+  $("focusText2").textContent = `Agent focus: ${T.focus_text}. It builds only what the tree allows; big steps wait for your OK.`;
+  $("builtBtn").textContent = SHOW_BUILT ? "Show future path" : `Show all (+${c.unlocked} built)`;
+  renderTree(T); renderNodePanel();
+  const nx = [...T.plan.mine, ...T.plan.proposed].find(i=>i.id===T.plan.next_id);
+  $("buildNextLine").innerHTML = nx ? `<span style="color:var(--warn)">★</span> Agent builds next: <b>#${nx.id} ${esc(nx.title)}</b> (${nx.source==="you"?"your queue":esc(nx.source)}). Full order under <a href="#" onclick="setTab('build','queue');return false">Queue</a>.`
+    : `★ Nothing can start on its own right now. The reason is shown under <a href="#" onclick="setTab('build','queue');return false">Queue</a>.`;
+  $("looseIdeas").innerHTML = T.loose_ideas.length ? `${T.loose_ideas.length} idea(s) not on the tree yet: Re-evaluate places them, or set “builds on” in <a href="#" onclick="setTab('brain');return false">Brain</a>.` : "";
+}
+
+// ---------------- editing ----------------
+const LABEL = {tasks:"task", ideas:"idea", goals:"goal", capabilities:"capability"};
+const OPTS = {owner:["me","ai","both"], category:["general","system","learning","work","school","creative","money","physical"],
+  horizon:["week","month","quarter","year","life"], gate:["idea","dropped"], branch:null,
+  status:{tasks:["todo","doing","dropped"], goals:["active","paused","achieved","dropped"], capabilities:["auto","unlocked","dropped"]}};
+const FORM = {
+  tasks:[["title","Title"],["description","Description","text"],["owner","Who does it","sel"],["capability_id","Builds capability","cap"],["goal_id","Goal","goal"],
+         ["impact","Impact (1–5)","num"],["effort_h","Hours","num"],["due","Due","date"],["depends_on","Waits for tasks (ids, comma)"],["status","Status","sel"]],
+  ideas:[["title","Title"],["description","Description","text"],["category","Category","sel"],["capability_id","Builds on capability","cap"],["impact","Impact (1–5)","num"],["effort_h","Hours","num"]],
+  goals:[["title","Title"],["why","Why","text"],["horizon","Horizon","sel"],["status","Status","sel"]],
+  capabilities:[["title","Title"],["description","What it can do","text"],["branch","Branch","sel"],["requires","Needs capabilities","caps"],["status","Status","sel"]]};
+let EDIT = null;
+async function call(op, id, text){  // like act(), without reloading the page data
+  const r = await fetch("/api/action",{method:"POST",headers:{"Content-Type":"application/json",...H()},body:JSON.stringify({op,id,text})});
+  const j = await r.json(); if (j.error){ toast(j.error, 7000); return null; } return j.result;
+}
+function fieldHTML(table, [f, label, kind], v){
+  v = v ?? "";
+  const opt = (val, text, on) => `<option value="${esc(val)}" ${on?"selected":""}>${esc(text)}</option>`;
+  if (kind === "text") return `<label>${label}</label><textarea name="${f}">${esc(v)}</textarea>`;
+  if (kind === "sel") { let list = f==="status" ? OPTS.status[table] : f==="branch" ? D.tree.branches.map(b=>b.key) : OPTS[f];
+    if (f==="status" && v && !list.includes(v)) list = [v, ...list];  // e.g. done (agent-only): shown, not offered
+    const names = f==="branch" ? Object.fromEntries(D.tree.branches.map(b=>[b.key,b.title])) : {};
+    return `<label>${label}</label><select name="${f}">${list.map(o=>opt(o, names[o]||o, String(v)===o)).join("")}</select>`; }
+  if (kind === "cap") return `<label>${label}</label><select name="${f}">${opt("","— none —",!v)}${D.tree.nodes.map(n=>opt(n.id, `${n.title} (${STATE_TEXT[n.state]})`, +v===n.id)).join("")}</select>`;
+  if (kind === "goal") return `<label>${label}</label><select name="${f}">${opt("","— none —",!v)}${flatGoals(D.plan.goals).map(g=>opt(g.id, "— ".repeat(g.depth)+g.title, +v===g.id)).join("")}</select>`;
+  if (kind === "caps") { const on = new Set(String(v).split(",").filter(Boolean).map(Number));
+    return `<label>${label}</label><select name="${f}" multiple size="5">${D.tree.nodes.filter(n=>!EDIT||n.id!==EDIT.id||EDIT.table!=="capabilities").map(n=>opt(n.id, n.title, on.has(n.id))).join("")}</select>`; }
+  return `<label>${label}</label><input name="${f}" type="${kind==="num"?"number":kind==="date"?"date":"text"}" ${kind==="num"?'step="any"':""} value="${esc(v)}">`;
+}
+function showEditor(table, row, isNew){
+  EDIT = {table, id: row.id||null, row, isNew};
+  $("edTitle").textContent = `${isNew?"New":"Edit"} ${LABEL[table]}${row.id?` #${row.id}`:""}`;
+  const spec = FORM[table].filter(([f])=> !(isNew && f==="status"));
+  $("edFields").innerHTML = spec.map(x=>fieldHTML(table, x, row[x[0]])).join("");
+  $("edDrop").hidden = isNew;
+  $("edQueue").hidden = !(table==="tasks" && row.status==="proposed");  // a draft: edit, then queue
+  $("editor").showModal();
+}
+async function openEdit(table, id){ const r = await call("get", id, table); if (r) showEditor(table, JSON.parse(r), false); }
+function openNew(table, preset={}){ showEditor(table, {owner:"me", category:"general", horizon:"quarter", branch:"make", impact:3, ...preset}, true); }
+function formValues(){
+  const out = {};
+  $("edFields").querySelectorAll("[name]").forEach(el=>{
+    const v = el.multiple ? [...el.selectedOptions].map(o=>o.value).join(",") : el.value.trim();
+    if (EDIT.isNew) { if (v !== "") out[el.name] = v; return; }
+    if (String(EDIT.row[el.name] ?? "") !== v) out[el.name] = v === "" ? null : v;
+  });
+  return out;
+}
+async function saveEdit(ev){
+  ev.preventDefault();
+  const fields = formValues();
+  const r = EDIT.isNew ? await act("create", null, JSON.stringify({table:EDIT.table, fields}))
+                       : await act("edit", EDIT.id, JSON.stringify({table:EDIT.table, fields}));
+  if (r) { $("editor").close(); toast(r); }
+}
+// Queue this on a skill tree node: a draft task (the agent ignores it) opens for editing; Save & queue sends it
+async function queueNode(cid){ const id = await call("node_draft", cid); if (id) { await openEdit("tasks", +id); load(); } }
+async function queueDraft(){
+  const r = await act("queue_draft", EDIT.id, JSON.stringify(formValues()));
+  if (r) { $("editor").close(); toast(r); }
+}
+async function dropItem(){
+  const f = EDIT.table==="ideas" ? {gate:"dropped"} : {status:"dropped"};
+  if (!confirm(`Remove this ${LABEL[EDIT.table]}? It is set aside, not deleted, and can be undone under Plan → What changed.`)) return;
+  const r = await act("edit", EDIT.id, JSON.stringify({table:EDIT.table, fields:f}));
+  if (r) { $("editor").close(); toast("Removed"); }
+}
+
+// ---------------- lanes: every task in flight (building, or a PR awaiting review), one selectable tab each (#57) ----------------
+let LANE = null;  // run id of the selected lane; kept across refreshes
+const LANE_STATE = {running:"building", pr:"PR waits for review", conflict:"PR conflicts with main"};
+function laneTab(l){
+  return `<button class="lane ${l.state}${l.run===LANE?" sel":""}" onclick="selectLane(${l.run})" title="${esc(l.title)}">
+    <div class="t"><i></i>#${l.task_id} ${esc(l.title)}</div><span class="sub">${LANE_STATE[l.state]||esc(l.state)}${l.kind==="resolve"?" · conflict fix":""}</span>
+    ${l.progress!=null?`<div class="pbar"><b style="width:${l.progress}%"></b></div>`:""}</button>`;
+}
+function laneDetail(l, A){
+  const st = l.state==="running" ? `<span class="state on">building</span>` : `<span class="state ${l.state==="conflict"?"bad":""}">${LANE_STATE[l.state]}</span>`;
+  const lines = [
+    l.state==="running" ? `since ${l.started.slice(11,16)} · ${mins(l.elapsed)||"&lt;1 min"} of max ${A.max_minutes} min${l.progress!=null?` (${l.progress}%)`:""}`
+      : `built ${l.started.replace("T"," ").slice(5,16)}${l.elapsed?` in ${mins(l.elapsed)}`:""}${l.turns?` · ${l.turns} turns`:""}${l.cost_usd?` · ~${usd(l.cost_usd)}`:""}`,
+    `branch ${esc(l.branch)}${l.pr_url?` · <a href="${esc(l.pr_url)}" target="_blank" rel="noopener">pull request</a>`:""}`,
+    l.model ? modelWhy(l.model, l.model_reason) : "",
+    l.stacked_on.length ? `Stacked on ${l.stacked_on.map(t=>"#"+t).join(", ")}: their PRs come first.` : "",
+    l.in_stack_of ? `Part of the stack under #${l.in_stack_of}: merging that PR also merges this one.` : "",
+    l.conflict.length ? `Conflicts with main: ${l.conflict.map(esc).join(", ")}. Resolve it under Queue → Conflicts with main.` : "",
+    l.doing && l.state !== "running" ? `Now: ${esc(l.doing)}` : ""].filter(Boolean);
+  return `<div class="title">#${l.task_id} ${esc(l.title)} ${st}</div>${lines.map(x=>`<div class="meta">${x}</div>`).join("")}
+    ${l.summary&&l.state!=="running"?`<details><summary class="sub" style="cursor:pointer">summary</summary><div class="review" style="margin-top:4px">${esc(l.summary)}</div></details>`:""}`;
+}
+// The console: each log line becomes a step, like Claude Code in a terminal: what it says (·), which tool it uses (→), and the end (■).
+const TOOLKIND = {Edit:"edit", Write:"edit", MultiEdit:"edit", NotebookEdit:"edit", Bash:"run", Read:"read", Grep:"read", Glob:"read", LS:"read", WebFetch:"read", WebSearch:"read"};
+function conLine(raw){
+  const m = /^(\d\d:\d\d) (.*)$/.exec(raw), t = m ? m[1] : "", rest = m ? m[2] : raw;
+  if (rest.startsWith("→ ")) { const i = rest.indexOf(": "), name = i > 0 ? rest.slice(2, i) : rest.slice(2), arg = i > 0 ? rest.slice(i+2) : "";
+    return `<div class="cl tool"><span class="ct">${t}</span><span class="cx"><span class="tk ${TOOLKIND[name]||""}">${esc(name)}</span><code>${esc(arg)}</code></span></div>`; }
+  if (rest.startsWith("· ")) return `<div class="cl say"><span class="ct">${t}</span><span class="cx">${esc(rest.slice(2))}</span></div>`;
+  if (rest.startsWith("■")) return `<div class="cl done ${/error/.test(rest)?"err":""}"><span class="ct">${t}</span><span class="cx">${esc(rest)}</span></div>`;
+  return `<div class="cl sys ${/fail|error|stopped|killed/i.test(rest)?"err":""}"><span class="ct">${t}</span><span class="cx">${esc(rest)}</span></div>`;
+}
+const consoleHTML = lines => lines.map(conLine).join("");
+const nowText = lines => { for (let i = lines.length-1; i >= 0; i--) { const r = lines[i].replace(/^\d\d:\d\d /, "");
+  if (r.startsWith("→ ")) return "Using " + r.slice(2); if (r.startsWith("· ")) return r.slice(2); } return "Starting…"; };
+// live streaming of the selected running lane: only new lines are fetched (GET /api/run?after=n)
+const LIVE = {run:null, lines:[], total:0, info:null, timer:null};
+function renderLanes(A){
+  const L = A.lanes || [];
+  if (!L.some(l=>l.run===LANE)) LANE = L.length ? (L.find(l=>l.state==="running")||L[0]).run : null;
+  const sel = L.find(l=>l.run===LANE), n = L.filter(l=>l.state==="running").length;
+  $("nowTitle").textContent = !L.length ? "Next up" : `In flight · ${n} building · ${L.length-n} PR${L.length-n===1?"":"s"} waiting`;
+  $("agentLanes").hidden = L.length < 2;   // one lane needs no tabs
+  $("agentLanes").innerHTML = L.map(laneTab).join("");
+  const streaming = sel && sel.state === "running" && LIVE.run === sel.run && LIVE.lines.length;
+  const log = streaming ? LIVE.lines : sel ? sel.log : A.log;
+  $("agentNow").innerHTML = (sel ? laneDetail(sel, A)
+    : A.next ? `<div class="title">#${A.next.id} ${esc(A.next.title)}</div><div class="meta">${A.next.resumes?"continues where a usage limit stopped it, once the limit has reset":"first in the build queue (Queue)"}</div>`
+    : empty(esc(A.why_idle)))
+    + (sel && sel.state === "running" ? `<div class="runbar" title="share of the ${A.max_minutes}-minute limit"><b style="width:${(LIVE.run===sel.run&&LIVE.info?LIVE.info.progress:sel.progress)||2}%"></b></div>
+       <div class="nowline"><span class="spin"></span><span>${esc(nowText(streaming || !sel.doing ? log : [sel.doing]))}</span></div>` : "");
+  const box = $("agentLog"), follow = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;   // keep following unless you scrolled up
+  box.hidden = !log.length;
+  box.innerHTML = consoleHTML(log);
+  if (follow || renderLanes.last !== LANE) box.scrollTop = box.scrollHeight;
+  renderLanes.last = LANE;
+  liveFollow(sel);
+}
+function liveFollow(sel){
+  const want = sel && sel.state === "running" && tab === "forge" && stage === "build" && view.build === "live" ? sel.run : null;
+  if (want !== LIVE.run) { clearTimeout(LIVE.timer); Object.assign(LIVE, {run:want, lines:[], total:0, info:null}); if (want) livePoll(); }
+}
+async function livePoll(){
+  const run = LIVE.run; if (!run) return;
+  try {
+    const r = await fetch(`/api/run?run=${run}&after=${LIVE.total}`, {headers:H()}); const j = await r.json();
+    if (LIVE.run !== run || j.error) return;
+    if (j.from < LIVE.total) LIVE.lines = [];
+    LIVE.lines = LIVE.lines.concat(j.lines).slice(-800); LIVE.total = j.total; LIVE.info = j;
+    if (j.status !== "running") { LIVE.run = null; load(); return; }   // finished: refresh lanes, PR and summary
+    if (tab === "forge" && stage === "build" && view.build === "live") renderLanes(D.agent);
+  } catch(e) {}
+  if (LIVE.run === run) LIVE.timer = setTimeout(livePoll, 2500);
+}
+function selectLane(run){ LANE = run; renderLanes(D.agent); }
+
+// ---------------- Ideas → Plan → Build ----------------
+// the flow strip on those three pages: where you are, and how much sits in each stage
+function renderFlow(){
+  const open = (D.ideas||[]).filter(i=>i.gate==="idea").length, A = D.agent;
+  const planned = D.progress.open, building = (A.lanes||[]).length + A.plan.mine.length;
+  const st = [["brain","Ideas",open,"raw material, waiting for a place"],["plan","Plan",planned,"being shaped in the plan"],["build","Build",building,"on the anvil or queued"]];
+  document.querySelectorAll("[data-flow]").forEach(el=>{ const here = el.dataset.flow;
+    el.innerHTML = st.map(([k,l,n,d],i)=>`${i?'<span class="arrow" aria-hidden="true">→</span>':""}<button class="fstep ${k===here?"on":""}" onclick="setTab('${k}')" ${k===here?'aria-current="page"':""}>
+      ${icon(k)}<span><b>${l}</b> <span class="n">${n}</span><span class="d">${d}</span></span></button>`).join(""); });
+}
+// idea cards: each open idea with Atlas's suggestion for where it fits (hq.placement); buttons refer to ideas by index
+let IDEAS = [];
+function renderIdeas(list){
+  IDEAS = list.filter(i=>i.gate==="idea"); const done = list.filter(i=>i.gate!=="idea");
+  $("ideaCount").textContent = IDEAS.length || "";
+  const goals = flatGoals(D.plan.goals);
+  const opts = n => `<select class="mini" aria-label="Another goal" onchange="if(this.value)ideaToPlan(${n},+this.value)"><option value="">Other goal…</option>${goals.map(g=>`<option value="${g.id}">${"— ".repeat(g.depth)}${esc(g.title).slice(0,50)}</option>`).join("")}</select>`;
+  $("ideaList").innerHTML = IDEAS.map((i,n)=>{ const p = i.place || {};
+    const fit = p.goal_id ? `<div class="fit">${icon("goal")}<span>Fits <b>${esc(p.goal)}</b><span class="why">${esc(p.why)}</span></span><span class="by" title="${p.by==="ai"?"suggested by Claude":"suggested by word overlap"}">${p.by==="ai"?"✦ AI":"rule"}</span></div>`
+      : `<div class="fit new">${icon("next")}<span>Could start a new goal: <b>${esc(p.new_goal||i.title)}</b><span class="why">${esc(p.why||"")}</span></span><span class="by">${p.by==="ai"?"✦ AI":"rule"}</span></div>`;
+    return `<div class="idea"><div class="itop"><span class="tag">${esc(i.category)}</span><button class="ed" title="Edit" onclick="openEdit('ideas',${i.id})">✎</button></div>
+      <div class="title">${esc(i.title)}</div>${i.description?`<div class="desc">${esc(i.description)}</div>`:""}
+      ${fit}${i.overlap?`<div class="fit new" title="Overlap check: compared with Atlas's functions and the arsenal">${icon("next")}<span>${esc(i.overlap.label)}: <b>${esc(i.overlap.match_ref)} ${esc(i.overlap.match_title)}</b><span class="why">${esc(i.overlap.why)}</span></span><span class="by">${i.overlap.by==="ai"?"✦ AI":"rule"}</span></div>`:""}
+      <div class="btns" style="flex-wrap:wrap">${p.goal_id?`<button class="b primary" onclick="ideaToPlan(${n},${p.goal_id})">Add to plan →</button>`:`<button class="b primary" onclick="ideaToGoal(${n})">Start as new goal →</button>`}
+        ${p.goal_id?`<button class="b" onclick="ideaToGoal(${n})">New goal</button>`:""}${opts(n)}
+        <button class="ed" title="Not now: set it aside (undoable)" onclick="optimistic(this,()=>act('edit',IDEAS[${n}].id,JSON.stringify({table:'ideas',fields:{gate:'dropped'}})),'Idea set aside')">✕</button></div></div>`; }).join("")
+    || empty("No open ideas. Say or type a thought on Today; Atlas sorts it, and ideas land here with a suggested place.");
+  $("ideaDoneCount").textContent = done.length || "";
+  $("ideaDoneList").innerHTML = done.map(i=>`<div class="row"><div class="grow"><div class="title" style="font-weight:400">${esc(i.title)}</div><div class="meta">idea #${i.id} → task #${i.task_id}</div></div></div>`).join("") || empty("None yet.");
+}
+async function ideaToPlan(n, goal){ const r = await act("idea_plan", IDEAS[n].id, String(goal)); if (r) toast(r, 6000); }
+async function ideaToGoal(n){ const i = IDEAS[n], p = i.place || {};
+  const title = prompt("Name of the new goal", p.new_goal || i.title); if (title === null) return;
+  const r = await act("idea_goal", i.id, JSON.stringify({title})); if (r) toast(r, 6000); }
+async function placeIdeas(btn){ btn.disabled = true; btn.textContent = "Claude is placing…"; const r = await act("place_ideas"); btn.disabled = false; btn.textContent = "✦ Re-place with AI"; if (r) toast(r, 7000); }
+function renderConstitution(C){
+  if (!C) return;
+  const list = (title, items, cls) => `<div class="cblock ${cls}"><h3>${title}</h3><ul>${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`;
+  const m = C.money, eur = v => v ? `€${v}` : "nothing";
+  $("constitution").innerHTML = `<div class="mission" style="margin:0 0 12px"><div class="k">${icon("goal")}Mission of ${esc(C.owner)}'s Atlas · phase ${C.phase}</div><p>${esc(C.mission)}</p></div>
+    <div class="cgrid">${list("May do on its own", C.allowed, "ok")}${list("Asks you first", C.requires_approval, "wait")}${list("Never", C.never, "bad")}</div>
+    <p class="meta" style="margin-top:10px">Money: spends ${eur(m.auto_spend_limit_eur)} on its own · monthly budget ${eur(m.monthly_budget_eur)} · all spending stops at a loss of ${eur(m.loss_stop_eur)}.</p>`;
+}
+
+// ---------------- Research: the curated feed, saved findings, deep research, sources ----------------
+let FEED = [], NOTES = [], feedFilter = "all";
+const IMPACT = {high:"High impact", medium:"Worth a look", low:"Background"};
+function findingRow(r, n, compact){
+  return `<div class="finding ${r.impact}"><div class="ftop"><span class="imp ${r.impact}">${IMPACT[r.impact]||""}</span><span class="tag">${esc(r.label||r.source)}</span>
+      <span class="sub">${esc((r.found||"").slice(5,10))}</span>${r.state==="starred"?'<span class="star" title="saved">★</span>':""}</div>
+    <a class="title" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title)} ↗</a>
+    ${!compact && r.summary && r.summary!==r.title?`<div class="desc">${esc(r.summary)}</div>`:""}
+    ${r.why?`<div class="why"><b>Why it matters:</b> ${esc(r.why)}</div>`:""}
+    ${r.prereq && !compact?`<div class="meta">${r.prereq.ready?"✓ ":"○ "}<b>Before you start:</b> ${esc(r.prereq.line)}</div>`:""}
+    ${!compact && r.topics.length?`<div class="meta">${r.topics.map(t=>`<span class="tag match">${esc(t)}</span>`).join("")}</div>`:""}
+    <div class="btns" style="flex-wrap:wrap">
+      ${compact?"":`<button class="b" title="${r.state==="starred"?"Remove from saved":"Save it"}" onclick="act('${r.state==="starred"?"new":"starred"}',FEED[${n}].id)">${r.state==="starred"?"Unsave":"★ Save"}</button>`}
+      ${r.kind==="tool" && !compact ? `
+      <button class="b" title="Use it as it is (outside code: sandbox and your approval first)" onclick="toolIdea(${n},'adopt')">Adopt</button>
+      <button class="b" title="Take parts of its open-source code into Atlas or a project" onclick="toolIdea(${n},'adapt')">Adapt</button>
+      <button class="b" title="Build our own version of the idea" onclick="toolIdea(${n},'build')">Build</button>
+      <button class="b" title="Compare adopt, adapt and build: compatibility, dependencies, benefit, effort, upkeep (one model call)" onclick="compareTool(${n})">Compare</button>`
+      : `<button class="b" title="Make it an opportunity: an idea in Forge, where Atlas suggests where it fits and you choose adopt, adapt or build" onclick="act('idea',FEED[${n}].id).then(r=>r&&toast('Added to Forge → Ideas'))">→ Opportunity</button>`}
+      ${compact?"":`<button class="b" title="Deep research on this item" onclick="exploreItem(${n})">Explore</button><button class="ed" title="Hide" onclick="optimistic(this,()=>act('dismissed',FEED[${n}].id),'Hidden',()=>act('new',FEED[${n}].id))">✕</button>`}</div></div>`;
+}
+function renderResearch(R){
+  if (!R) return;
+  FEED = R.feed; NOTES = R.notes;
+  const srcs = ["all", "high", ...new Set(FEED.filter(r=>r.kind!=="tool").map(r=>r.source))];
+  $("radarFilters").innerHTML = srcs.map(k=>`<button class="chip ${k===feedFilter?"on":""}" onclick="feedFilter='${k}';renderResearch(D.research)">${k==="all"?"All":k==="high"?"High impact":esc(R.all_sources[k]||k)}</button>`).join("");
+  const shown = FEED.map((r,n)=>[r,n]).filter(([r])=>r.kind!=="tool" && (feedFilter==="all" || (feedFilter==="high" ? r.impact==="high" : r.source===feedFilter)));
+  $("feedCount").textContent = shown.length || "";
+  $("researchFeed").innerHTML = shown.map(([r,n])=>findingRow(r,n)).join("") || empty("Nothing relevant yet. The next scan runs within a few hours, or press Scan now.");
+  const tools = FEED.map((r,n)=>[r,n]).filter(([r])=>r.kind==="tool");
+  $("toolCount").textContent = tools.length || "";
+  $("researchTools").innerHTML = tools.map(([r,n])=>findingRow(r,n)).join("") || empty("No tools found yet. GitHub, releases and Hugging Face models land here after the next scan.");
+  $("radarLast").textContent = (R.last_scan ? `Last scan ${R.last_scan.replace("T"," ").slice(5,16)}` : "Not scanned yet") + ` · every ${R.settings.every_hours} h`;
+  const saved = FEED.map((r,n)=>[r,n]).filter(([r])=>r.state==="starred");
+  $("researchSaved").innerHTML = saved.map(([r,n])=>findingRow(r,n)).join("") || empty("Nothing saved yet. ★ Save a finding in the feed to keep it here.");
+  $("savedFindings").innerHTML = saved.slice(0,6).map(([r,n])=>findingRow(r,n,true)).join("") || empty("Nothing saved in Research yet.");
+  $("researchNotes").innerHTML = NOTES.map((x,k)=>{ const a = x.answer || {};
+    return `<div class="card note"><div class="ftop"><span class="tag">${x.status==="done"?"answered":x.status==="failed"?"no model":"working…"}</span><span class="sub">#${x.id} · ${esc((x.created||"").replace("T"," ").slice(5,16))}</span></div>
+      <div class="title">${esc(x.question)}</div>
+      ${a.summary?`<p>${esc(a.summary)}</p>`:""}${a.matters?`<p><b>Why it matters:</b> ${esc(a.matters)}</p>`:""}${a.risks?`<p><b>Risks:</b> ${esc(a.risks)}</p>`:""}
+      ${(a.next_steps||[]).length?`<ol>${a.next_steps.map(t=>`<li>${esc(t)}</li>`).join("")}</ol>`:""}
+      ${(a.sources||[]).length?`<div class="meta">Sources: ${a.sources.map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(u.replace(/^https?:\/\//,"").slice(0,48))}</a>`).join(" · ")}</div>`:""}
+      <div class="btns" style="margin-top:8px">${x.idea_id?`<span class="sub">→ idea #${x.idea_id}</span>`:`<button class="b" onclick="act('note_idea',NOTES[${k}].id).then(r=>r&&toast(r,5000))">→ Idea${a.idea?`: ${esc(a.idea.slice(0,40))}`:""}</button>`}</div></div>`; }).join("");
+  if (renderResearch.form !== JSON.stringify(R.settings)) {   // rebuilt only when the settings change, so editing survives a refresh
+    renderResearch.form = JSON.stringify(R.settings); const S = R.settings;
+    $("researchForm").innerHTML = `<label>Scan every</label><select id="rsEvery">${[1,3,6,12,24,48,168].map(h=>`<option value="${h}"${h===S.every_hours?" selected":""}>${h<24?h+" hours":h===24?"day":h===48?"2 days":"week"}</option>`).join("")}</select>
+      <label>Items per source and scan</label><input id="rsPer" type="number" min="3" max="50" value="${S.per_source}">
+      <label>Sources</label><div class="checks">${Object.entries(R.all_sources).map(([k,l])=>`<label class="check"><input type="checkbox" value="${k}"${S.sources.includes(k)?" checked":""}> ${esc(l)}</label>`).join("")}</div>
+      <label>Releases to follow (owner/repo, one per line)</label><textarea id="rsRepos">${esc(S.repos.join("\n"))}</textarea>
+      <label>Keep findings for (days)</label><input id="rsKeep" type="number" min="3" max="365" value="${S.keep_days}">`;
+  }
+  $("researchStatus").textContent = R.due ? "A scan is due; it runs within the hour." : `Next scan after ${R.settings.every_hours} h from the last one.`;
+}
+async function saveResearch(btn){
+  const S = {every_hours: +$("rsEvery").value, per_source: +$("rsPer").value, keep_days: +$("rsKeep").value,
+    sources: [...document.querySelectorAll("#researchForm .checks input:checked")].map(x=>x.value),
+    repos: $("rsRepos").value.split(/\s+/).filter(Boolean)};
+  btn.disabled = true; const r = await act("research_settings", null, JSON.stringify(S)); btn.disabled = false; if (r) toast(r, 5000);
+}
+async function deepResearch(btn, radarId){
+  const q = $("deepQ").value.trim(); if (!q && !radarId) { $("deepQ").focus(); return; }
+  btn.disabled = true; btn.textContent = "Researching… (up to a minute)";
+  const r = await act("deep_research", radarId || null, q); btn.disabled = false; btn.textContent = "Research this";
+  if (r) { $("deepQ").value = ""; toast(r, 5000); }
+}
+async function toolIdea(n, approach){ const r = await act("tool_idea", FEED[n].id, approach); if (r) toast(r, 5000); }
+function compareTool(n){ const r = FEED[n]; setTab("research","deep");
+  $("deepQ").value = `Should Atlas adopt "${r.title}" as it is, adapt parts of its code, or build its own version? Compare the three on compatibility with Atlas (Python stdlib, Raspberry Pi), dependencies, expected benefit, implementation effort and maintenance, name any prerequisite Atlas lacks, and recommend one.`;
+  deepResearch($("deepBtn"), r.id); }
+function exploreItem(n){ const r = FEED[n]; setTab("research","deep"); $("deepQ").value = `What is "${r.title}" and could it help Atlas or my projects?`; deepResearch($("deepBtn"), r.id); }
+
+// ---------------- pipeline (Build → Live) and the glance row (Today) ----------------
+function renderPipeline(A){
+  const L = A.lanes || [], P = A.plan, building = L.filter(l=>l.state==="running"), review = L.filter(l=>l.state!=="running");
+  const conflicts = review.filter(l=>l.state==="conflict").length, merged = A.runs.filter(r=>r.status==="merged");
+  const step = (k, label, n, d, go, cls="") => `<button class="step ${cls}" onclick="${go}"><div class="k">${icon(k)}${label}</div><div class="n">${n}</div><div class="d">${d}</div></button>`;
+  $("pipeline").innerHTML =
+    step("queue", "Queued", P.mine.length + P.proposed.length, P.mine.length ? `${P.mine.length} from you first` : P.proposed.length ? "proposed by Atlas" : "nothing waiting", "setTab('build','queue')")
+    + step("build", "Building", building.length, building.length ? esc(building.map(l=>"#"+l.task_id+" "+l.title).join(", ")) : A.killed ? "kill switch on" : A.paused ? "paused" : "idle", "selectLane(LANE)", building.length ? "on" : "")
+    + step("review", "Your review", review.length, conflicts ? `${conflicts} conflict${conflicts>1?"s":""} with main` : review.length ? "pull requests ready" : "nothing to review", "setTab('build','queue')", conflicts ? "warn" : "")
+    + step("done", "Recently merged", merged.length, merged.length ? `latest #${merged[0].task_id} ${esc(merged[0].title||"")}` : "none yet", "setTab('build','history')");
+}
+function renderGlance(D){
+  const A = D.agent, P = D.progress, rec = D.brain.recommended[0], I = D.interruptions || [], C = (D.commands || []), nNeeds = D.needs.length + C.length + I.length;
+  const tile = (k, label, v, d, go, cls="") => `<button class="gl ${cls}" onclick="${go}">${icon(k)}<span style="min-width:0"><span class="k">${label}</span><span class="v" style="display:block">${v}</span><span class="d">${d}</span></span></button>`;
+  $("glance").innerHTML =
+    tile("needs", "Needs you", nNeeds, I.length ? `resume: ${esc(I[0].project)} (usage limit)` : C.length ? `run in terminal: ${esc(C[0].title)}` : nNeeds ? esc(D.needs[0].title) : "nothing waiting on you", "(!$('intrCard').hidden?$('intrCard'):!$('cmdCard').hidden?$('cmdCard'):$('needsCard')).scrollIntoView({behavior:'smooth'})", nNeeds ? "hot" : "")
+    + tile("build", "Building now", A.current ? `<span class="dot"></span>#${A.current.task_id}` : "—", A.current ? esc(A.current.title) : A.killed ? "kill switch is on" : "the agent is idle", "setTab('build','live')", A.current ? "live" : "")
+    + tile("done", "Done today", P.done_today, `${P.done_week} this week · streak ${P.streak}d`, "setTab('plan','progress')")
+    + tile("next", "Next for you", rec ? "#"+rec.task_id : "—", rec ? esc(rec.title) : "nothing open", rec ? `openTaskDetail(${rec.task_id})` : "");
+}
+
+// ---------------- build queue: what the agent builds, in order ----------------
+const QSTATE = {ready:["ready","on"], working:["working","on"], needs_ok:["needs your OK","bad"], blocked:["waits","",], pr:["PR open",""], failed:["failed",""], locked:["locked",""]};
+function qRow(i, A, k, isMine){
+  const [label, cls] = QSTATE[i.state] || [i.state, ""];
+  const canRun = !A.current && !A.killed && A.installed && i.state !== "working" && i.state !== "pr";
+  const star = i.id === A.plan.next_id ? '<span style="color:var(--warn)">★</span> ' : "";
+  return `<div class="row"><div class="grow">
+    <div class="title">${star}${esc(i.title)} <span class="state ${cls}">${label}</span></div>
+    <div class="meta">#${i.id} · ${isMine?"you queued it":esc(i.source)}${i.node?` · ${esc(i.node)}`:""}${i.note?` · ${esc(i.note)}`:""}</div></div>
+    <div class="btns"><button class="b" onclick="openTaskDetail(${i.id})">Why this?</button>
+      ${i.state==="needs_ok"?`<button class="b" onclick="act('build_no',${i.id}).then(r=>r&&toast(r))">Not now</button><button class="b primary" onclick="act('build_ok',${i.id}).then(r=>r&&toast(r))">Approve</button>`:""}
+      ${isMine&&k>0?`<button class="b" title="Build this first" onclick="act('queue_top',${i.id}).then(r=>r&&toast(r))">↑</button>`:""}
+      ${!isMine&&i.state!=="working"?`<button class="b" title="Put it in your own queue: built first, no approval needed" onclick="act('task_owner',${i.id},'ai').then(r=>r&&toast('In your queue'))">+ My queue</button>`:""}
+      ${canRun?`<button class="b ${isMine&&k===0?"primary":""}" title="Build this one now" onclick="runTask(this,${i.id})">▶ Run</button>`:""}
+      ${isMine?`<button class="b" title="Take it out of the AI's queue" onclick="act('task_owner',${i.id},'me').then(r=>r&&toast('Back to you'))">✕</button>`:""}
+    </div></div>`;
+}
+function queueHTML(A, n){
+  const P = A.plan, sec = (t, sub) => `<h2 style="margin:12px 0 2px">${t} <span class="sub" style="text-transform:none;letter-spacing:0;font-weight:400">${sub}</span></h2>`;
+  const more = (list, from, f) => list.length > from ? `<details><summary class="sub" style="cursor:pointer;padding:6px 0">${list.length-from} more</summary>${list.slice(from).map(f).join("")}</details>` : "";
+  const mineRow = (i,k) => qRow(i, A, k, true), propRow = (i,k) => qRow(i, A, k, false);
+  return (A.why_idle && !A.current ? `<div class="meta" style="margin-bottom:6px"><b>Why nothing runs:</b> ${esc(A.why_idle)}</div>` : "")
+    + sec("Your queue", "· built first, in your order, no approval needed")
+    + (P.mine.slice(0,n).map(mineRow).join("") || empty("Empty. Press → AI on a task or idea, or + My queue on a proposal below.")) + more(P.mine, n, mineRow)
+    + sec("Proposed by Atlas", `· after your queue · from your plan and ideas (${esc(D.tree.focus_text)})`)
+    + (P.proposed.slice(0,n).map(propRow).join("") || empty("No proposals right now.")) + more(P.proposed, n, propRow)
+    + (P.waiting.length ? `<details><summary class="sub" style="cursor:pointer;padding:8px 0">${P.waiting.length} waiting (another task first, locked capability, PR open, failed)</summary>${P.waiting.map(propRow).join("")}</details>` : "");
+}
+async function runTask(btn, id){
+  btn.disabled = true; btn.textContent = "Starting…";
+  const r = await act("dev_run", id);
+  if (!r) { btn.disabled = false; btn.textContent = "▶ Run"; return; }
+  toast("Run started");
+  for (let k = 0; k < 10; k++) { await new Promise(res => setTimeout(res, 3000)); await load(); if (D.agent.current) break; }
+}
+
+const LEVELS = ["off","ask","limits","continuous"];
+const LEVEL_TEXT = {off:"Off: the agent does not start runs.", ask:"Ask first: before each run you get Approve/Deny on your phone.",
+  limits:"Within limits: runs on schedule (every 3 hours), up to the daily limit.", continuous:"Continuous: starts the next task as soon as one is done, up to the daily limit."};
+function renderToday(D){
+  const B = D.brain, A = D.agent;
+  $("chatLog").innerHTML = D.chat.map(m=>`<div class="msg ${m.role}">${esc(m.text)}</div>`).join("");
+  $("chatLog").scrollTop = $("chatLog").scrollHeight;
+  $("focusText").textContent = B.focus || (B.error ? `Claude has not re-evaluated yet (${B.error}). Showing the plan's own ranking.` : "");
+  $("recommended").innerHTML = B.recommended.map((r,k)=>`<div class="row focusrow"><span class="nr">${k+1}</span>
+    <div class="grow"><div class="title">${esc(r.title)}</div><div class="meta">#${r.task_id}${r.why?` · ${esc(r.why)}`:""}</div></div>
+    ${taskBtns(r.task_id)}</div>`).join("")
+    || empty("Nothing open. Drop a thought above.");
+  $("suggestCard").hidden = !B.suggest.length; $("suggestCount").textContent = B.suggest.length || "";
+  SUGGEST = B.suggest;  // buttons refer to suggestions by index: model text never goes into an onclick attribute
+  $("suggest").innerHTML = B.suggest.map((sg,n)=>`<div class="row"><div class="grow"><div class="title">${sg.action==="drop"?"Drop":"Merge"} ${esc(sg.task_ids.map(i=>"#"+i).join(" + "))}</div>
+    <div class="meta">${esc(sg.reason)}</div></div><div class="btns">
+    <button class="b" onclick="act('brain_dismiss',null,JSON.stringify(SUGGEST[${n}].task_ids))">Keep</button>
+    <button class="b primary" onclick="act('brain_accept',null,JSON.stringify(SUGGEST[${n}])).then(r=>r&&toast(r))">${sg.action==="drop"?"Drop":"Merge"}</button></div></div>`).join("");
+  const lvl = LEVELS.indexOf(A.autonomy);
+  if (document.activeElement !== $("auto")) $("auto").value = lvl;
+  $("auto").disabled = !(A.enabled && A.installed && !A.killed);
+  $("autoText").innerHTML = A.killed ? "The kill switch is on (Turn off above)."
+    : !A.installed ? "Claude Code is not installed on the Pi yet (README → Dev loop)."
+    : !A.enabled ? "The agent is switched off. Switch it on once on the Pi: <b>bash deploy/enable-devloop.sh</b>"
+    : `${esc(A.autonomy_text)} ${A.runs_today}/${A.max_runs_per_day} runs today.${A.current?` Working on #${A.current.task_id} ${esc(A.current.title)}.`:""}`;
+  if (document.activeElement !== $("batch"))
+    $("batch").innerHTML = A.batch_choices.map(n=>`<option value="${n}"${n===A.batch?" selected":""}>${n===1?"every PR":n+" PRs"}</option>`).join("");
+  $("batchText").textContent = `${A.open_prs} waiting now. ${A.batch_text}`;
+  for (const [id, k] of [["limRuns","runs"],["limTokens","tokens"],["limUsd","usd"]]) {
+    if (document.activeElement !== $(id)) $(id).value = A.limits[k];
+    $(id).max = A.ceilings[k] || ""; $(id).title = A.ceilings[k] ? `at most ${A.ceilings[k]} (ceiling in [devloop])` : "no ceiling";
+  }
+  $("limText").textContent = A.limits_text + (A.limit_reached ? ` No new runs: ${A.limit_reached}.` : "");
+  const queuedIds = new Set([...A.plan.mine, ...A.plan.proposed, ...A.plan.waiting].map(t=>t.id));
+  const sugg = B.ai_queue.filter(x=>!queuedIds.has(x.task_id));
+  $("aiSuggestWrap").hidden = !sugg.length;
+  $("aiSuggest").innerHTML = sugg.map(x=>`<div class="row"><div class="grow"><div class="title">${esc(x.title)}</div><div class="meta">#${x.task_id} · ${esc(x.why)}</div></div>
+    <div class="btns"><button class="b primary" onclick="act('task_owner',${x.task_id},'ai').then(r=>r&&toast('Queued'))">Queue</button></div></div>`).join("");
+}
+function autoPreview(v){ $("autoText").textContent = LEVEL_TEXT[LEVELS[v]]; }
+async function setLimit(kind, v){ const r = await act("dev_limit", null, JSON.stringify({kind, value: Number(v)})); if (r) toast(r, 4000); }
+async function setBatch(v){ const r = await act("batch", null, v); if (r) toast(r, 4000); }
+async function setAutonomy(v){ const r = await act("autonomy", null, LEVELS[v]); if (r) toast(r, 4000); }
+async function askClaude(btn){
+  const t = $("dump").value.trim(); if (!t) return;
+  btn.disabled = true; btn.textContent = "Claude is thinking…";
+  $("chatLog").innerHTML += `<div class="msg me">${esc(t)}</div>`; $("chatLog").scrollTop = $("chatLog").scrollHeight;
+  const r = await act("ask", null, t);
+  btn.disabled = false; btn.textContent = "Ask Claude";
+  if (r) { $("dump").value = ""; }
+}
+const WHAT = {tasks:"task", ideas:"idea", goals:"goal", capabilities:"capability"};
+function changeText(c){
+  const what = WHAT[c.table_name] || c.table_name;
+  return c.action === "create" ? `Added ${what} #${c.row_id} ${esc(c.title)}`
+    : `${what} #${c.row_id} ${esc(c.title)}: <b>${esc(c.field)}</b> ${esc(JSON.stringify(c.old))} → ${esc(JSON.stringify(c.new))}`;
+}
+function renderChanges(B){
+  $("brainChanges").innerHTML = B.changes.map(c=>`<div class="row ${c.undone?"done":""}"><div class="grow">
+    <div class="title" style="font-weight:400">${changeText(c)}</div>
+    <div class="meta">${esc(c.ts.replace("T"," ").slice(5,16))}${c.reason?` · ${esc(c.reason)}`:""}${c.undone?" · undone":""}</div></div>
+    ${c.undone?"":`<div class="btns"><button class="b" onclick="act('brain_undo',${c.id}).then(r=>r&&toast('Undone'))">Undo</button></div>`}</div>`).join("")
+    || empty("Nothing yet. Claude logs every change it makes here, with the reason.");
+}
+async function replan(btn){ btn.disabled=true; btn.textContent="Claude is re-evaluating…"; const r = await act("replan"); btn.disabled=false; btn.textContent="Re-evaluate tasks"; if(r) toast(r, 9000); }
+
+async function writeReview(btn){ btn.disabled=true; await act("review"); btn.disabled=false; toast("Review written"); }
+
+async function load(){
+  const r = await fetch("/api/data",{headers:H()});
+  if (r.status === 401) { document.querySelector(".wrap").innerHTML = '<div class="card" style="margin-top:40px">Open this page once with your token: <b>/?t=YOUR_TOKEN</b></div>'; return; }
+  D = await r.json(); render(); setupMic();
+}
+
+let buildRequest = null;
+async function buildNow(btn){
+  const prompt = $('dump').value.trim();
+  if(!prompt) { $('dump').focus(); return; }
+  if(!buildRequest || buildRequest.prompt !== prompt) buildRequest={prompt,request_id:crypto.randomUUID()};
+  btn.disabled=true; btn.textContent='Starting…';
+  const result = $('buildNowResult'); result.hidden=false; result.textContent='Preparing your build…';
+  try {
+    const response = await fetch('/api/action', {method:'POST',headers:{'Content-Type':'application/json',...H()},body:JSON.stringify({op:'build_now',text:JSON.stringify(buildRequest)})});
+    const data=await response.json();
+    if(data.error) throw new Error(data.error);
+    const outcome=JSON.parse(data.result);
+    result.textContent=outcome.message;
+    $('dump').value=''; buildRequest=null;
+    await load();
+  } catch(e) { result.textContent=e.message; }
+  finally { btn.disabled=false; btn.textContent='▶ Build now'; }
+}
+
+async function sendDump(){
+  const t = $("dump").value.trim(); if(!t) return;
+  $("dump").value = ""; toast("Got it, sorting…", 15000);   // at once: sorting can take a few seconds (a model call)
+  const r = await act("dump", null, t);
+  if (r === null) { if (!$("dump").value) $("dump").value = t; return; }   // refused: the text comes back, nothing lost
+  const ids = (act.changes || []).slice();
+  showUndo(r, ids.length ? () => act("brain_undo_many", null, ids.join(",")) : null);
+}
+async function scan(btn){ btn.disabled=true; btn.textContent="Scanning…"; await act("scan"); btn.disabled=false; btn.textContent="Scan now"; toast("Radar updated"); }
+
+// Talk button. Best: record the whole utterance and let Whisper (GPU PC or cloud) transcribe it in one go,
+// like the Claude app. Fallback: the browser's own streaming recognizer, restarted after every pause.
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+try { $("micLang").value = localStorage.getItem("hq.voiceLang") ?? ""; } catch(e) {}
+function addSpoken(t){ t = (t||"").trim(); const el = (micTarget && needsInput(micTarget)) || $("dump");   // 🎙 on a Needs item fills its field
+  if (t) el.value += (el.value.trim() ? " " : "") + t; }
+function micLang(){ return $("micLang").value || (D && D.voice.language) || ""; }
+function setupMic(){
+  const mic = $("mic"), hint = $("micHint");
+  if (setupMic.done) return; setupMic.done = true;
+  if (!window.isSecureContext) {
+    hint.innerHTML = "Talk needs the https address of Atlas: on the Pi run <b>bash deploy/https-dashboard.sh</b>. Your keyboard's mic works meanwhile.";
+  } else if (D.voice.server.length && navigator.mediaDevices && window.MediaRecorder) {
+    mic.disabled = false; let rec = null;
+    hint.textContent = `Talk records, then Whisper (${D.voice.server.join(" / ")}) writes it out.`;
+    mic.onclick = async () => {
+      if (rec) { rec.stop(); return; }
+      let stream;
+      try { stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true, autoGainControl:true}}); }
+      catch(e) { toast("No microphone access: " + e.message, 5000); return; }
+      const chunks = []; rec = new MediaRecorder(stream);
+      rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+      rec.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop()); rec = null;
+        mic.disabled = true; mic.textContent = "Writing out…";
+        const blob = new Blob(chunks, {type: chunks[0]?.type || "audio/webm"});
+        try {
+          const r = await fetch("/api/voice?lang=" + encodeURIComponent(micLang()), {method:"POST", headers:{"Content-Type": blob.type, ...H()}, body: blob});
+          const j = await r.json(); if (j.error) toast(j.error, 7000); else addSpoken(j.text);
+        } catch(e) { toast("Upload failed: " + e.message, 5000); }
+        mic.disabled = false; mic.textContent = "🎙 Talk";
+      };
+      rec.start(); mic.textContent = "■ Stop";
+    };
+  } else if (SR) {
+    mic.disabled = false; let rec = null, want = false;
+    hint.textContent = "Speech by your browser. For Claude-app quality, set up Whisper (docs/VOICE.md).";
+    const listen = () => {
+      rec = new SR(); rec.continuous = false; rec.interimResults = true;   // continuous mode repeats and drops words on Android
+      rec.lang = micLang() || navigator.language || "en-US";
+      rec.onresult = e => { let live = "";
+        for (let i=e.resultIndex;i<e.results.length;i++) { if (e.results[i].isFinal) addSpoken(e.results[i][0].transcript); else live += e.results[i][0].transcript; }
+        hint.textContent = live || "Listening…"; };
+      rec.onerror = e => { if (e.error === "not-allowed" || e.error === "service-not-allowed") { want = false; toast("No microphone access", 5000); } };
+      rec.onend = () => { if (want) listen(); else { rec = null; mic.textContent = "🎙 Talk"; hint.textContent = "Done listening."; } };
+      rec.start();
+    };
+    mic.onclick = () => { if (want) { want = false; rec && rec.stop(); return; } want = true; listen(); mic.textContent = "■ Stop"; };
+  } else {
+    hint.textContent = "This browser has no built-in speech recognition; use your keyboard's mic (or Chrome / Safari).";
+  }
+}
+let lastBrowserReport=0;
+function reportBrowserError(type,line){
+  if(Date.now()-lastBrowserReport<60000)return;lastBrowserReport=Date.now();
+  fetch('/api/action',{method:'POST',headers:{'Content-Type':'application/json',...H()},body:JSON.stringify({op:'report_browser_error',text:JSON.stringify({type,line})})}).catch(()=>{});
+}
+window.addEventListener('error',e=>{if(e.filename && new URL(e.filename,location.href).origin===location.origin)reportBrowserError(e.error?.name||'BrowserError',e.lineno||0);});
+window.addEventListener('unhandledrejection',e=>{if(e.reason instanceof Error && e.reason.name!=='TypeError')reportBrowserError(e.reason.name,0);});
+load();
+setInterval(() => { if (tab === "forge" && stage === "build" && view.build === "live" && D && D.agent.current) load(); }, 15000);   // lanes and pipeline; the console itself streams via /api/run
+setInterval(load, 60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "taskId": "RA-013",
+  "owner": "Claude",
+  "sessionId": "devloop-114-1026004147",
+  "branch": "hq-dev/114-ra-013-implement-windows-pi-offline-sync-1026004147",
+  "leaseExpiresAt": null,
+  "lastCheckpointCommit": "1a78b60",
+  "status": "in_progress",
+  "nextReadyTasks": [
+    "RA-031",
+    "RA-055"
+  ],
+  "blockedTasks": {
+    "RA-056": "waits for RA-031 (phone) and the owner's approval",
+    "RA-057": "waits for the owner's approval of the re-evaluation on the Pi"
+  },
+  "note": "RA-055: engine/ + atlas.sh, aliases hq/ + hq.sh; evidence STATE/evidence/RA-055.md",
+  "claimedAt": "2026-10-25T23:49:38Z",
+  "nextAction": "Review RA-013; restart the hub on the Pi, then Sync now on the PC under Systems \u203a Connections",
+  "checkpointAt": "2026-10-25T23:49:43Z"
+}

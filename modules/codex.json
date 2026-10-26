@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "codex",
+  "name": "Codex (ChatGPT app)",
+  "kind": "tool",
+  "summary": "ChatGPT's Codex in the ChatGPT desktop app. Builds in the repository; continues from the repository's handoff files.",
+  "opens": "ChatGPT desktop app, Codex; continue with the handoff prompt Atlas prepares.",
+  "domains": [
+    {
+      "id": "workbench",
+      "name": "Workbench",
+      "summary": "Coding agent work outside Atlas."
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "codex.workbench.edit_repository",
+      "domain": "workbench",
+      "summary": "Read, change, test and commit the Atlas repository.",
+      "effect": "act",
+      "status": "live",
+      "intent": "code.edit",
+      "evidence": "STATE/evidence/RA-002.md"
+    }
+  ]
+}

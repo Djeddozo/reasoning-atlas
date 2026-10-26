@@ -1,0 +1,10 @@
+[Unit]
+Description=Check HQ health and repairs every two minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=2min
+Unit=hq-recovery.service
+
+[Install]
+WantedBy=timers.target

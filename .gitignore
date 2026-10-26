@@ -1,0 +1,31 @@
+# Private/runtime data
+.env
+.env.*
+!.env.example
+*.db
+*.db-wal
+*.db-shm
+*.sqlite*
+runtime/
+imports/
+private/
+logs/
+node_modules/
+.venv/
+__pycache__/
+dist/
+.claude/worktrees/
+.codex/worktrees/
+
+# From HQ (engine)
+memory/*.db
+memory/*.db-*
+briefs/
+memory/*.log
+memory/voice/
+memory/intake/
+memory/mockups/
+memory/chat-files/
+.devloop/
+memory/KILL
+config/local.toml

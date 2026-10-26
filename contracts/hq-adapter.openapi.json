@@ -1,0 +1,366 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Atlas HQ Adapter — proposed contract, not an existing HQ API",
+    "version": "0.1.0",
+    "description": "Implement on a separate adapter. Snapshot first. Writes remain disabled until upstream deduplication and reconciliation are proven."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8785",
+      "description": "Proposed test-only loopback endpoint; not deployed"
+    }
+  ],
+  "security": [
+    {
+      "adapterToken": []
+    }
+  ],
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "Adapter status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/snapshots": {
+      "post": {
+        "operationId": "importSnapshot",
+        "description": "Imports a supplied snapshot to Atlas staging; never writes HQ.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Snapshot"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validated idempotent import",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid snapshot; staging transaction rolled back"
+          }
+        }
+      }
+    },
+    "/v1/build-proposals": {
+      "post": {
+        "operationId": "proposeBuild",
+        "description": "Disabled unless capabilities.writeProposals and upstream deduplication are proven. Same commandId with differing request hash returns 409.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuildProposal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted, not necessarily executed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Command"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision conflict or command ID reused with different payload"
+          },
+          "503": {
+            "description": "Disconnected, writes disabled or outcome unknown; reconcile before retry"
+          }
+        }
+      }
+    },
+    "/v1/commands/{commandId}": {
+      "get": {
+        "operationId": "reconcileCommand",
+        "parameters": [
+          {
+            "name": "commandId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Durable known or unknown outcome",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Command"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown command; does not prove that no external side effect occurred"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "adapterToken": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "Health": {
+        "type": "object",
+        "required": [
+          "status",
+          "schemaVersion",
+          "capabilities"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "offline",
+              "incompatible"
+            ]
+          },
+          "schemaVersion": {
+            "const": 1
+          },
+          "upstreamCommit": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastSyncAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "capabilities": {
+            "type": "object",
+            "required": [
+              "readSnapshot",
+              "writeProposals"
+            ],
+            "properties": {
+              "readSnapshot": {
+                "type": "boolean"
+              },
+              "writeProposals": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "Snapshot": {
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "snapshotId",
+          "sourceSystem",
+          "sourceCommit",
+          "capturedAt",
+          "entities"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "const": 1
+          },
+          "snapshotId": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "const": "hq"
+          },
+          "sourceCommit": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalEntity"
+            }
+          }
+        }
+      },
+      "ExternalEntity": {
+        "type": "object",
+        "required": [
+          "externalId",
+          "entityType",
+          "revision",
+          "data"
+        ],
+        "properties": {
+          "externalId": {
+            "type": "string"
+          },
+          "entityType": {
+            "enum": [
+              "capability",
+              "task",
+              "goal",
+              "resource",
+              "idea",
+              "run",
+              "research"
+            ]
+          },
+          "revision": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "deleted": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "ImportResult": {
+        "type": "object",
+        "required": [
+          "snapshotId",
+          "inserted",
+          "updated",
+          "unchanged"
+        ],
+        "properties": {
+          "snapshotId": {
+            "type": "string"
+          },
+          "inserted": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "updated": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "unchanged": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "BuildProposal": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "commandId",
+          "expectedRevision",
+          "capabilityId",
+          "title",
+          "acceptanceCriteria",
+          "confirmedByUser"
+        ],
+        "properties": {
+          "commandId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expectedRevision": {
+            "type": "string"
+          },
+          "capabilityId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "acceptanceCriteria": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmedByUser": {
+            "const": true
+          }
+        }
+      },
+      "Command": {
+        "type": "object",
+        "required": [
+          "commandId",
+          "state",
+          "externalTaskId",
+          "retrySafe"
+        ],
+        "properties": {
+          "commandId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "enum": [
+              "queued",
+              "acknowledged",
+              "failed",
+              "unknown"
+            ]
+          },
+          "externalTaskId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "retrySafe": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

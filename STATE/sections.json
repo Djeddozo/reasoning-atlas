@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "description": "Every section a function can live in (docs/STRUCTURE.md, ADR-024, ADR-025). Each platform and app function names exactly one in its atlasSection; the registry refuses others. 'Automatic' is for functions that run on their own without a screen of their own; what they produce appears elsewhere (for example in Today).",
+  "sections": [
+    "Today",
+    "Focus",
+    "Forge › Ideas",
+    "Forge › Plan",
+    "Forge › Build",
+    "Cortex",
+    "Notes",
+    "Map",
+    "Map › Skill tree",
+    "Research",
+    "Resources",
+    "Memory",
+    "Tags",
+    "Archive",
+    "Systems",
+    "Header",
+    "Automatic",
+    "Horizon › Research map",
+    "Horizon › Roadmap",
+    "Horizon › Experiments",
+    "Horizon › Hypotheses"
+  ]
+}

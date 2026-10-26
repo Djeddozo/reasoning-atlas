@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "description": "What only the owner can do, added by agents: context, a checklist, answered questions and an optional question for the owner. Shown in Notes › For you and by `python -m services.atlas.actions`. Ticks, the owner's input and 'done' are stored locally and never change this file. Remove an item once it is settled. Never put secret values here.",
+  "actions": [
+    {
+      "id": "demo-release",
+      "title": "Review and release the weekly build (synthetic example)",
+      "link": "docs/DEVELOPMENT.md",
+      "createdAt": "2026-10-26T00:00:00Z",
+      "context": "Synthetic demo item. Agents finished three tasks this week on their own branches; the tests passed and pull requests are open. Only the owner merges.",
+      "steps": [
+        {
+          "id": "read-prs",
+          "text": "Read the three open pull requests",
+          "detail": "Each pull request links its evidence file with the exact checks that ran."
+        },
+        {
+          "id": "merge",
+          "text": "Merge the ones you accept",
+          "detail": "The updater installs merged work by itself; rejected work goes back to the plan."
+        },
+        {
+          "id": "restart",
+          "text": "Restart the demo service",
+          "detail": "Only needed when the service itself changed.",
+          "command": "./atlas.sh"
+        }
+      ]
+    }
+  ]
+}

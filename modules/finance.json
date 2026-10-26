@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "finance",
+  "name": "Finance",
+  "kind": "app",
+  "integrationLevel": "L0",
+  "parent": "atlas",
+  "summary": "The owner's financial vault as its own section, kept whole (owner direction). Also covers the engine's planned 'Budget & spending'. Its functions are listed once it is dissected (RA-023).",
+  "repository": "Djeddozo/finance_vault",
+  "authority": "Finance owns its data; financial data stays local and out of Git.",
+  "domains": [
+    {
+      "id": "finance",
+      "name": "Finance",
+      "summary": "Budgets, spending and financial overview."
+    }
+  ],
+  "capabilities": []
+}

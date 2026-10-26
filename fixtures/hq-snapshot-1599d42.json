@@ -1,0 +1,484 @@
+{
+  "schemaVersion": 1,
+  "snapshotId": "hq-synthetic-0001",
+  "sourceSystem": "hq",
+  "sourceCommit": "1599d42cfb03fa381b3bbd2b8c66254b3e670e3c",
+  "capturedAt": "2026-10-18T12:00:00Z",
+  "note": "Synthetic snapshot shaped like HQ's database at commit 1599d42 (hq/db.py, hq/skilltree.py). Capability titles come from HQ's built-in seed; every other entity is invented. Contains no personal data.",
+  "entities": [
+    {
+      "externalId": "1",
+      "entityType": "capability",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Memory",
+        "branch": "core",
+        "requires": "",
+        "status": "unlocked",
+        "state": "unlocked",
+        "proof": "confirmed",
+        "description": "Synthetic copy of an HQ seed node."
+      }
+    },
+    {
+      "externalId": "2",
+      "entityType": "capability",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Planning & ranking",
+        "branch": "core",
+        "requires": "1",
+        "status": "unlocked",
+        "state": "unlocked",
+        "proof": "confirmed",
+        "description": "Synthetic copy of an HQ seed node."
+      }
+    },
+    {
+      "externalId": "5",
+      "entityType": "capability",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Self-building",
+        "branch": "ops",
+        "requires": "2",
+        "status": "unlocked",
+        "state": "unlocked",
+        "proof": "confirmed",
+        "description": "Synthetic copy of an HQ seed node."
+      }
+    },
+    {
+      "externalId": "6",
+      "entityType": "capability",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Usage & kill switch",
+        "branch": "ops",
+        "requires": "5",
+        "status": "unlocked",
+        "state": "unlocked",
+        "proof": "confirmed",
+        "description": "Synthetic copy of an HQ seed node."
+      }
+    },
+    {
+      "externalId": "8",
+      "entityType": "capability",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Budget & spending",
+        "branch": "ops",
+        "requires": "6",
+        "status": "auto",
+        "state": "building",
+        "proof": "partial",
+        "description": "Synthetic copy of an HQ seed node."
+      }
+    },
+    {
+      "externalId": "9",
+      "entityType": "capability",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Parallel workstreams",
+        "branch": "ops",
+        "requires": "5,6",
+        "status": "auto",
+        "state": "available",
+        "proof": "none",
+        "description": "Synthetic copy of an HQ seed node."
+      }
+    },
+    {
+      "externalId": "10",
+      "entityType": "capability",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Brain",
+        "branch": "mind",
+        "requires": "2",
+        "status": "unlocked",
+        "state": "unlocked",
+        "proof": "confirmed",
+        "description": "Synthetic copy of an HQ seed node."
+      }
+    },
+    {
+      "externalId": "13",
+      "entityType": "capability",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Local models (GPU PC)",
+        "branch": "mind",
+        "requires": "10",
+        "status": "auto",
+        "state": "available",
+        "proof": "suggested",
+        "description": "Synthetic copy of an HQ seed node."
+      }
+    },
+    {
+      "externalId": "16",
+      "entityType": "capability",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Reading PDFs & scans",
+        "branch": "reach",
+        "requires": "14",
+        "status": "auto",
+        "state": "locked",
+        "proof": "none",
+        "description": "Synthetic copy of an HQ seed node."
+      }
+    },
+    {
+      "externalId": "19",
+      "entityType": "capability",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Sandbox for outside code",
+        "branch": "make",
+        "requires": "5",
+        "status": "auto",
+        "state": "available",
+        "proof": "none",
+        "description": "Synthetic copy of an HQ seed node."
+      }
+    },
+    {
+      "externalId": "1",
+      "entityType": "goal",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic goal: a self-steering personal system",
+        "horizon": "year",
+        "why": "Synthetic reason.",
+        "status": "active"
+      }
+    },
+    {
+      "externalId": "2",
+      "entityType": "goal",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic goal: one central platform",
+        "horizon": "quarter",
+        "why": "Synthetic reason.",
+        "status": "active"
+      }
+    },
+    {
+      "externalId": "3",
+      "entityType": "goal",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic goal: an old plan",
+        "horizon": "month",
+        "why": "Synthetic reason.",
+        "status": "dropped"
+      }
+    },
+    {
+      "externalId": "101",
+      "entityType": "task",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic task: spend log",
+        "description": "Synthetic acceptance: done when the step works and is tested.",
+        "goal_id": 1,
+        "owner": "ai",
+        "status": "done",
+        "capability_id": 8,
+        "depends_on": "",
+        "impact": 3,
+        "effort_h": 2.0,
+        "confidence": 0.7,
+        "score": 1.0
+      }
+    },
+    {
+      "externalId": "102",
+      "entityType": "task",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic task: budget limits",
+        "description": "Synthetic acceptance: done when the step works and is tested.",
+        "goal_id": 1,
+        "owner": "ai",
+        "status": "doing",
+        "capability_id": 8,
+        "depends_on": "101",
+        "impact": 3,
+        "effort_h": 2.0,
+        "confidence": 0.7,
+        "score": 1.0
+      }
+    },
+    {
+      "externalId": "103",
+      "entityType": "task",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic task: virtual card proposal",
+        "description": "Synthetic acceptance: done when the step works and is tested.",
+        "goal_id": 1,
+        "owner": "me",
+        "status": "proposed",
+        "capability_id": 8,
+        "depends_on": "102",
+        "impact": 3,
+        "effort_h": 2.0,
+        "confidence": 0.7,
+        "score": 1.0
+      }
+    },
+    {
+      "externalId": "104",
+      "entityType": "task",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic task: run two agents at once",
+        "description": "Synthetic acceptance: done when the step works and is tested.",
+        "goal_id": 2,
+        "owner": "ai",
+        "status": "todo",
+        "capability_id": 9,
+        "depends_on": "",
+        "impact": 3,
+        "effort_h": 2.0,
+        "confidence": 0.7,
+        "score": 1.0
+      }
+    },
+    {
+      "externalId": "105",
+      "entityType": "task",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic task: try a local voice model",
+        "description": "Synthetic acceptance: done when the step works and is tested.",
+        "goal_id": 1,
+        "owner": "both",
+        "status": "blocked",
+        "capability_id": 13,
+        "depends_on": "",
+        "impact": 3,
+        "effort_h": 2.0,
+        "confidence": 0.7,
+        "score": 1.0
+      }
+    },
+    {
+      "externalId": "106",
+      "entityType": "task",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic task: sandbox with no credentials",
+        "description": "Synthetic acceptance: done when the step works and is tested.",
+        "goal_id": 2,
+        "owner": "ai",
+        "status": "todo",
+        "capability_id": 19,
+        "depends_on": "104",
+        "impact": 3,
+        "effort_h": 2.0,
+        "confidence": 0.7,
+        "score": 1.0
+      }
+    },
+    {
+      "externalId": "107",
+      "entityType": "task",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic task: dropped experiment",
+        "description": "Synthetic acceptance: done when the step works and is tested.",
+        "goal_id": 3,
+        "owner": "ai",
+        "status": "dropped",
+        "capability_id": null,
+        "depends_on": "",
+        "impact": 3,
+        "effort_h": 2.0,
+        "confidence": 0.7,
+        "score": 1.0
+      }
+    },
+    {
+      "externalId": "108",
+      "entityType": "task",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic task: read scanned PDFs",
+        "description": "Synthetic acceptance: done when the step works and is tested.",
+        "goal_id": 2,
+        "owner": "ai",
+        "status": "todo",
+        "capability_id": 16,
+        "depends_on": "999",
+        "impact": 3,
+        "effort_h": 2.0,
+        "confidence": 0.7,
+        "score": 1.0
+      }
+    },
+    {
+      "externalId": "1",
+      "entityType": "resource",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "kind": "hardware",
+        "name": "Synthetic GPU PC",
+        "details": "Synthetic GPU for local models",
+        "value": 24.0,
+        "unit": "GB VRAM",
+        "updated": "2026-10-18T12:00:00Z"
+      }
+    },
+    {
+      "externalId": "2",
+      "entityType": "resource",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "kind": "hardware",
+        "name": "Synthetic Raspberry Pi",
+        "details": "Always-on host",
+        "value": 8.0,
+        "unit": "GB RAM",
+        "updated": "2026-10-18T12:00:00Z"
+      }
+    },
+    {
+      "externalId": "3",
+      "entityType": "resource",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "kind": "skill",
+        "name": "Synthetic language: French",
+        "details": "Conversational",
+        "value": null,
+        "unit": "",
+        "updated": "2026-10-18T12:00:00Z"
+      }
+    },
+    {
+      "externalId": "4",
+      "entityType": "resource",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "kind": "time",
+        "name": "Synthetic weekly build time",
+        "details": "Evenings",
+        "value": 6.0,
+        "unit": "h/week",
+        "updated": "2026-10-18T12:00:00Z"
+      }
+    },
+    {
+      "externalId": "201",
+      "entityType": "idea",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic idea: language coach on the GPU PC",
+        "category": "learning",
+        "description": "Synthetic idea.",
+        "gate": "idea",
+        "capability_id": 13,
+        "score": 2.0
+      }
+    },
+    {
+      "externalId": "202",
+      "entityType": "idea",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "title": "Synthetic idea: promoted to a task",
+        "category": "system",
+        "description": "Synthetic idea.",
+        "gate": "promoted",
+        "capability_id": 9,
+        "score": 2.0
+      }
+    },
+    {
+      "externalId": "301",
+      "entityType": "run",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "task_id": 101,
+        "branch": "hq/task-101",
+        "status": "merged",
+        "head": "a1b2c3d",
+        "pr_url": "",
+        "summary": "Synthetic run."
+      }
+    },
+    {
+      "externalId": "302",
+      "entityType": "run",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "task_id": 102,
+        "branch": "hq/task-102",
+        "status": "running",
+        "head": "",
+        "pr_url": "",
+        "summary": "Synthetic run."
+      }
+    },
+    {
+      "externalId": "303",
+      "entityType": "run",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "task_id": 105,
+        "branch": "hq/task-105",
+        "status": "tests_failed",
+        "head": "d4e5f6a",
+        "pr_url": "",
+        "summary": "Synthetic run."
+      }
+    },
+    {
+      "externalId": "304",
+      "entityType": "run",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "task_id": 102,
+        "branch": "hq/task-102",
+        "status": "stopped",
+        "head": "b7c8d9e",
+        "pr_url": "",
+        "summary": "Synthetic run."
+      }
+    },
+    {
+      "externalId": "401",
+      "entityType": "research",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "question": "Synthetic question: which local speech model fits 24 GB?",
+        "status": "done",
+        "answer": {
+          "summary": "Synthetic summary.",
+          "sources": [
+            "https://example.org/synthetic"
+          ]
+        },
+        "idea_id": 201
+      }
+    },
+    {
+      "externalId": "402",
+      "entityType": "research",
+      "revision": "2026-10-18T12:00:00Z",
+      "data": {
+        "question": "Synthetic question: sandboxing options",
+        "status": "working",
+        "answer": {},
+        "idea_id": null
+      }
+    }
+  ]
+}

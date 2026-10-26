@@ -1,0 +1,9 @@
+[Unit]
+Description=Check Atlas builder queue and Claude reset
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/hq-system
+ExecStart=/bin/bash -c 'set -a; source .env; set +a; exec python3 -m engine.atlasplan'
+Environment=PATH=/home/user/.local/bin:/usr/local/bin:/usr/bin:/bin
+UMask=0077

@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd ~/hq-system && set -a && . ./.env 2>/dev/null; set +a; python3 -m engine gate",
+            "timeout": 660
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "defaultMode": "auto"
+  }
+}

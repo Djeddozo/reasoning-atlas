@@ -1,0 +1,151 @@
+{
+  "reference": "reasoning-atlas-windows-mockup.png",
+  "coordinateSpace": "original image pixels, origin top-left",
+  "method": "Approximate visual geometry; exact sampled colors. Not original design source.",
+  "image": {
+    "width": 1672,
+    "height": 941
+  },
+  "regions": {
+    "application": [
+      140,
+      37,
+      1394,
+      855
+    ],
+    "topbar": [
+      140,
+      37,
+      1394,
+      61
+    ],
+    "navigation": [
+      140,
+      98,
+      172,
+      794
+    ],
+    "knowledgeMap": [
+      326,
+      109,
+      934,
+      602
+    ],
+    "researchRoadmap": [
+      326,
+      722,
+      934,
+      162
+    ],
+    "focus": [
+      1273,
+      109,
+      253,
+      254
+    ],
+    "selectedNode": [
+      1273,
+      373,
+      253,
+      341
+    ],
+    "quickNote": [
+      1273,
+      724,
+      253,
+      162
+    ]
+  },
+  "mainNodes": {
+    "LLM Reasoning": [
+      818,
+      418,
+      90
+    ],
+    "Mathematical Reasoning": [
+      610,
+      285,
+      54
+    ],
+    "Symbolic Logic": [
+      818,
+      224,
+      49
+    ],
+    "Physics-based Models": [
+      1019,
+      289,
+      51
+    ],
+    "Evolutionary Search": [
+      1040,
+      435,
+      52
+    ],
+    "Chemical Computing": [
+      1001,
+      582,
+      52
+    ],
+    "Meta-Reasoner": [
+      818,
+      620,
+      55
+    ],
+    "Embodied Intelligence": [
+      621,
+      582,
+      51
+    ],
+    "Neuro-symbolic Systems": [
+      587,
+      435,
+      58
+    ]
+  },
+  "pixelSamples": [
+    {
+      "xy": [
+        950,
+        70
+      ],
+      "rgb": "#020C25"
+    },
+    {
+      "xy": [
+        1240,
+        110
+      ],
+      "rgb": "#050D26"
+    },
+    {
+      "xy": [
+        225,
+        165
+      ],
+      "rgb": "#130740"
+    },
+    {
+      "xy": [
+        1395,
+        755
+      ],
+      "rgb": "#0A1124"
+    },
+    {
+      "xy": [
+        1227,
+        858
+      ],
+      "rgb": "#071023"
+    }
+  ],
+  "excludedPresentation": [
+    "laptop bezel",
+    "Windows wallpaper",
+    "Windows taskbar",
+    "weather",
+    "screenshot clock/date"
+  ],
+  "implementationAcceptance": "Compare the application crop at the same scale, fixed fixture and viewport; document deviations."
+}

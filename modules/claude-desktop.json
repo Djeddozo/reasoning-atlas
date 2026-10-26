@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "claude-desktop",
+  "name": "Claude app",
+  "kind": "tool",
+  "summary": "Claude on the desktop, web and phone. Used when Atlas cannot do the work itself: editing the repository, web research, using the owner's browser or desktop apps.",
+  "opens": "Claude desktop app; continue with the handoff prompt Atlas prepares.",
+  "domains": [
+    {
+      "id": "workbench",
+      "name": "Workbench",
+      "summary": "General-purpose agent work outside Atlas."
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "claude-desktop.workbench.edit_repository",
+      "domain": "workbench",
+      "summary": "Read, change, test, commit and push the Atlas repository.",
+      "effect": "act",
+      "status": "live",
+      "intent": "code.edit",
+      "evidence": "STATE/evidence/RA-024.md"
+    },
+    {
+      "id": "claude-desktop.workbench.web_research",
+      "domain": "workbench",
+      "summary": "Search the web and read pages with sources.",
+      "effect": "read",
+      "status": "live",
+      "intent": "web.research",
+      "evidence": "STATE/evidence/RA-024.md",
+      "note": "Observed in this project's sessions; no Atlas-side test."
+    },
+    {
+      "id": "claude-desktop.workbench.use_browser",
+      "domain": "workbench",
+      "summary": "Act on websites in the owner's browser.",
+      "effect": "act",
+      "status": "live",
+      "intent": "browser.use",
+      "evidence": "STATE/evidence/RA-024.md"
+    },
+    {
+      "id": "claude-desktop.workbench.use_desktop_apps",
+      "domain": "workbench",
+      "summary": "See and operate desktop apps on the owner's computer.",
+      "effect": "act",
+      "status": "live",
+      "intent": "desktop.use",
+      "evidence": "STATE/evidence/RA-003.md",
+      "note": "Used to recover the Codex session in RA-003."
+    },
+    {
+      "id": "claude-desktop.workbench.local_files",
+      "domain": "workbench",
+      "summary": "Read and write files in folders the owner connects.",
+      "effect": "act",
+      "status": "live",
+      "intent": "files.local",
+      "evidence": "STATE/evidence/RA-024.md"
+    }
+  ]
+}

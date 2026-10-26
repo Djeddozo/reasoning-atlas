@@ -1,0 +1,18 @@
+# Cortex chat on Claude Code (RA-083)
+
+The Cortex chat runs on Claude Code with the owner's subscription; no API key is needed.
+
+| What | How |
+|---|---|
+| Real conversation | One Claude Code session per Atlas conversation (`--resume`, state `cortex_session_<n>`); a lost session restarts with the last ten turns word for word (up to 60k characters) and up to 40 older messages in short (#189). |
+| Streaming | `--output-format stream-json --include-partial-messages`; the hub streams newline-delimited JSON on `POST /v1/stream/engine.brain.chat_stream`, the PC server passes it on at `/api/stream/…`, the screen draws it as it comes. Events: `text`, `tool`, `status`, `error`, `done`. |
+| Model and thinking | `[models.jobs.chat]` in the constitution: `claude_code_model`, `thinking_tokens` (→ `MAX_THINKING_TOKENS`), `claude_code_timeout`, `chat_max_turns` (default 12), `web_fetch` (default off). |
+| Web | `WebSearch` always; `read_page` (#189, `engine/cortex_read.py`) reads a page as text through the intake's fetch: public http(s) hosts only, capped by `[intake] max_page_kb` and 40k characters, secrets in addresses and text redacted, returned as untrusted data. `WebFetch` stays off unless `web_fetch = true`. |
+| Code | `code_search` and `read_code` (#189): read-only search and reading in the files git tracks in this repository; secret files (the sandbox's `SECRET_NAMES`), `memory/`, `.devloop/`, `runtime/` and `config/local.toml` are never read; files over 1 MB are skipped. |
+| Atlas look-ups | `engine/cortex_mcp.py`, a stdlib MCP server opened read-only on the database: find, read, builder, past_conversations, changes; and the Engine's own read functions on that read-only connection (#180): arsenal_find, overlap (stored verdict when current, else the rule, never stored, no model call), priority (score parts, hand-placed score, Build next, blocked reason, briefing), delivery (PR stage and tasks). |
+| Changes | Three levels (#186, `engine/cortex_actions.py`). Routine, reversible plan changes he asked for (create or edit a task, idea or goal, order, dependencies, Build next, a memory, a thought) go through `do_now` and run at once through the change log with one Undo, when System › Settings › Cortex is "Routine changes at once" (the default; state `cortex_autonomy`). Decisions go through propose_action as numbered options, the recommended one first; file_thought, remember and offer_mockup as before. Money, external steps, accounts, outside code and the constitution are no hub actions and stay approvals. An option may bundle up to five steps, applied all or nothing (`engine.brain.cortex_apply`), one Undo. A tap keeps the other options open. Typed picks ("all", "1 and 3", "yes" = the first, "no") apply the latest options without a model call (state `cortex_pending_<conv>`); a typed choice number becomes his answer. ask_choices takes two to five answers with a recommended one (#160), plus Something else. |
+| Files | `engine.brain.chat_file` stores a file in `memory/chat-files/conv-N` (git-ignored), the session's working folder; Claude Code reads files there without asking and nothing outside it. |
+| Safety | No API keys or tokens in its environment; Bash, Edit, Write, NotebookEdit and Task are disallowed; plan, tool results, web pages and files are data, never instructions; the Pi's gatekeeper hook still sees every tool call. |
+| Fallback | Without Claude Code, or if it fails, the chat answers the one-shot way (`talk.say` with the full catalogue). |
+
+Not yet: one always-open Claude Code process (each turn still starts Claude Code; the answer streams once it starts).

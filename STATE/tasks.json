@@ -1,0 +1,1267 @@
+{
+  "schemaVersion": 1,
+  "tasks": [
+    {
+      "id": "RA-000",
+      "title": "Record the blueprint and repository",
+      "dependsOn": [],
+      "status": "done",
+      "owner": null,
+      "acceptance": "All document links and dependencies valid; artifacts published to the verified target; limitations explicit.",
+      "validation": "Blueprint validator and remote readback",
+      "evidence": "Documents and commit links",
+      "program": "atlas",
+      "path": "foundation"
+    },
+    {
+      "id": "RA-001",
+      "title": "Preserve and inspect the original mockup",
+      "dependsOn": [],
+      "status": "done",
+      "owner": null,
+      "acceptance": "Owner-supplied PNG preserved unchanged; SHA-256/dimensions recorded; visually inspected; regions and samples documented.",
+      "validation": "Strict reference validator, hash comparison and visual inspection",
+      "evidence": "Manifest, measurements and RA-001 evidence",
+      "program": "atlas",
+      "path": "foundation"
+    },
+    {
+      "id": "RA-002",
+      "title": "Define data contracts and fixtures",
+      "dependsOn": [
+        "RA-000"
+      ],
+      "status": "done",
+      "owner": "Codex",
+      "acceptance": "Validate DATA_MODEL entities; fixture with 200 nodes/400 edges; cover duplicate imports and dependency cycles.",
+      "validation": "Schema/invariant tests including invalid fixtures",
+      "evidence": "Schemas and tests",
+      "program": "atlas",
+      "path": "foundation"
+    },
+    {
+      "id": "RA-003",
+      "title": "Create development skeleton and local storage",
+      "dependsOn": [
+        "RA-002"
+      ],
+      "status": "done",
+      "owner": "Codex + Claude",
+      "acceptance": "Lockfiles, documented startup and health endpoint; saved note survives restart; no live Engine dependency.",
+      "validation": "Fresh checkout startup and storage crash/restart test",
+      "evidence": "Working local vertical slice",
+      "program": "atlas",
+      "path": "foundation"
+    },
+    {
+      "id": "RA-004",
+      "title": "Reproduce the reference-based visual shell",
+      "dependsOn": [
+        "RA-001",
+        "RA-003"
+      ],
+      "status": "done",
+      "owner": "Codex + Claude",
+      "acceptance": "Reference composition, tokens, graph and research roadmap reproduced; loading/empty/offline states; keyboard and 200% zoom usable.",
+      "validation": "Fixed-fixture screenshot comparison and manual accessibility check",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "visual-universe",
+      "note": "Reviewed 2026-10-25: the visual shell has been the app in daily use since RA-019; later screens built on it."
+    },
+    {
+      "id": "RA-005",
+      "title": "Implement intake and source provenance",
+      "dependsOn": [
+        "RA-003"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Persist notes and local sources; hash dedupe; retain original input; resume failed processing.",
+      "validation": "Duplicate import, restart and invalid source tests",
+      "evidence": "Import tests and fixtures",
+      "program": "atlas",
+      "path": "visual-universe"
+    },
+    {
+      "id": "RA-006",
+      "title": "Implement map, search and inspector",
+      "dependsOn": [
+        "RA-004",
+        "RA-005"
+      ],
+      "status": "done",
+      "owner": null,
+      "acceptance": "Selection, relationships, source passages, filters and camera state work; textual alternative available.",
+      "validation": "200-node keyboard/graph scenario and search measurement",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "visual-universe",
+      "note": "Covered 2026-10-25: Library › Map (graph and list, focus filters, inspector) and the header search (#99, #100)."
+    },
+    {
+      "id": "RA-007",
+      "title": "Implement skilltree and capability graph",
+      "dependsOn": [
+        "RA-002",
+        "RA-006"
+      ],
+      "status": "done",
+      "owner": null,
+      "acceptance": "Shared skills across projects; typed GPU/language resources; reject dependency cycles; separate proof and availability.",
+      "validation": "Cycle, evidence retraction and cross-project tests",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "visual-universe",
+      "note": "Covered 2026-10-25: Map › Skill tree (RA-047) with proof and requirements, and the capability graph on the Map."
+    },
+    {
+      "id": "RA-008",
+      "title": "Implement the Engine snapshot adapter",
+      "dependsOn": [
+        "RA-002"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Pinned synthetic Engine fixture normalizes IDs/proof/status; repeated snapshot does not change counts; no live writes.",
+      "validation": "Contract tests for missing fields and unknown versions",
+      "evidence": "Adapter and synthetic fixtures",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-009",
+      "title": "Connect Engine through a proven read-only boundary",
+      "dependsOn": [
+        "RA-003",
+        "RA-008"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Configured endpoint/auth; read-only export demonstrated; offline/stale/schema mismatch visible; no rescore endpoint treated as pure read.",
+      "validation": "Test-instance audit/database comparison; unauthorized/offline/upgrade cases",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "engine",
+      "note": "Reviewed 2026-10-25: superseded by the hub (RA-030 to RA-033), which reads the Engine through its own functions with offline and stale states."
+    },
+    {
+      "id": "RA-010",
+      "title": "Submit a build proposal from Atlas",
+      "dependsOn": [
+        "RA-007",
+        "RA-009"
+      ],
+      "status": "done",
+      "owner": null,
+      "acceptance": "Preview, explicit submission, external ID and duplicate reconciliation; enable writes only with upstream dedupe/correlation support.",
+      "validation": "Crash before/after external action and ledger save; repeated command ID",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "engine",
+      "note": "Covered 2026-10-25: Forge › Build quick build and draft tasks; outside code waits for approval (RA-043, RA-047, RA-065)."
+    },
+    {
+      "id": "RA-011",
+      "title": "Track build delivery and capability evidence",
+      "dependsOn": [
+        "RA-010"
+      ],
+      "status": "done",
+      "owner": null,
+      "acceptance": "Run/PR/merge/install states distinct; log cursor resumes; evidence attaches to correct capability.",
+      "validation": "Connection interruption; merged-but-not-installed PR",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "engine",
+      "note": "Covered 2026-10-25: the Engine's delivery states (draft → merged → installed) in Forge › Build, and proof on skill-tree nodes (RA-047)."
+    },
+    {
+      "id": "RA-012",
+      "title": "Implement memory and AI proposals",
+      "dependsOn": [
+        "RA-005",
+        "RA-007"
+      ],
+      "status": "done",
+      "owner": null,
+      "acceptance": "Versioned corrections, citations and review; reject invented sources; limits do not prevent local input.",
+      "validation": "Conflicting-source, prompt-injection and provider-failure scenarios",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "memory",
+      "note": "Covered 2026-10-25: Library › Memory with change log and undo (RA-050) and the Engine's reviewed proposals (do-over, RA-057, RA-064)."
+    },
+    {
+      "id": "RA-013",
+      "title": "Implement Windows–Pi offline synchronization",
+      "dependsOn": [
+        "RA-003",
+        "RA-009"
+      ],
+      "status": "review",
+      "owner": null,
+      "acceptance": "Single authority, durable outbox, revisions and tombstones; concurrent edits produce visible conflicts; client has no upstream credentials.",
+      "validation": "Disconnect during acknowledgment; restart; conflicting edits",
+      "evidence": "STATE/evidence/RA-013.md",
+      "program": "atlas",
+      "path": "continuity",
+      "note": "First slice 2026-10-26: notes sync through the hub (services/atlas/sync.py), Systems › Connections › Synced notes; tests/test_sync.py."
+    },
+    {
+      "id": "RA-014",
+      "title": "Implement Pi deployment and backup",
+      "dependsOn": [
+        "RA-013"
+      ],
+      "status": "todo",
+      "owner": null,
+      "acceptance": "Separate port/service/data; ARM64 startup; consistent backup; rollback with compatible schema.",
+      "validation": "Restore into empty fixture environment and health check",
+      "evidence": "Installation and recovery report",
+      "program": "atlas",
+      "path": "continuity"
+    },
+    {
+      "id": "RA-015",
+      "title": "Prove session-switch and usage-cap recovery",
+      "dependsOn": [
+        "RA-003"
+      ],
+      "status": "in_progress",
+      "owner": "Claude",
+      "acceptance": "Interrupt a task; a fresh Codex/Claude session resumes using only the repository; no duplicate external effects.",
+      "validation": "Controlled stop before and after checkpoint",
+      "evidence": "STATE/evidence/RA-015.md",
+      "program": "atlas",
+      "path": "continuity"
+    },
+    {
+      "id": "RA-016",
+      "title": "Complete release acceptance",
+      "dependsOn": [
+        "RA-011",
+        "RA-012",
+        "RA-014",
+        "RA-015",
+        "RA-017"
+      ],
+      "status": "todo",
+      "owner": null,
+      "acceptance": "All functional/visual gates passed; limitations recorded; export/restore succeeds; English UI/code/docs audit passes.",
+      "validation": "Full TESTING matrix and release review",
+      "evidence": "Release checklist and pinned commit",
+      "program": "atlas",
+      "path": "continuity"
+    },
+    {
+      "id": "RA-017",
+      "title": "Implement the in-app Vision Room",
+      "dependsOn": [
+        "RA-003",
+        "RA-012"
+      ],
+      "status": "todo",
+      "owner": null,
+      "acceptance": "Vision and conversation together; persistent questions; answers cite vision revision; changes require diff review; offline pending and export work.",
+      "validation": "Restart during question; provider limit; reject proposed vision edit",
+      "evidence": "Conversation and revision tests",
+      "program": "atlas",
+      "path": "memory"
+    },
+    {
+      "id": "RA-018",
+      "title": "Publish separate vision page and questions space",
+      "dependsOn": [
+        "RA-000"
+      ],
+      "status": "done",
+      "owner": null,
+      "acceptance": "Standalone readable VISION.md; persistent GitHub question issue; no false promise of automatic answers; English throughout.",
+      "validation": "Link check and issue readback",
+      "evidence": "Vision page and issue #1",
+      "program": "atlas",
+      "path": "foundation"
+    },
+    {
+      "id": "RA-019",
+      "title": "Show live build progress and update the open app safely",
+      "dependsOn": [
+        "RA-003"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Agents report task steps; the app shows a progress bar and step list; builds go to new release folders and switch atomically; open windows reload by themselves and keep the note draft; a silent builder shows as paused.",
+      "validation": "Browser test: start a task, rebuild while the page is open, confirm reload with retained draft, done and stalled states; unit tests for progress and release switching",
+      "evidence": "Screenshots and tests",
+      "program": "atlas",
+      "path": "platform"
+    },
+    {
+      "id": "RA-020",
+      "title": "Define module manifests and the capability registry",
+      "dependsOn": [
+        "RA-002"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "JSON schema for module manifests and capabilities (id, effect, status, home, schemas, evidence); registry rejects duplicate IDs, unknown effects and live status without evidence; hand-written L0 manifest for Engine using the confirmed domain groups.",
+      "validation": "Contract tests with valid, duplicate and invalid manifests",
+      "evidence": "Schemas, Engine manifest and tests",
+      "program": "atlas",
+      "path": "platform"
+    },
+    {
+      "id": "RA-021",
+      "title": "Build the Systems view",
+      "dependsOn": [
+        "RA-004",
+        "RA-020"
+      ],
+      "status": "done",
+      "owner": null,
+      "acceptance": "Modules grouped by domain with their capabilities, status, integration level and evidence; usage lines to Atlas sections; capability detail; keyboard and list alternative.",
+      "validation": "Fixture with three modules; keyboard selection; 200% zoom; screenshot review by the owner",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "platform",
+      "note": "Superseded 2026-10-25 by ADR-025: the module and capability view lives in Library › Map; Systems holds connections (RA-051)."
+    },
+    {
+      "id": "RA-022",
+      "title": "Call capabilities through the registry",
+      "dependsOn": [
+        "RA-008",
+        "RA-020"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Read capabilities run through the adapter with provenance on every result; propose capabilities require preview and confirmation; act capabilities stay disabled; offline modules fail visibly.",
+      "validation": "Synthetic Engine snapshot; offline module; duplicate propose; provenance audit",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "platform",
+      "note": "Reviewed 2026-10-25: merged into main by the owner (PR #7)."
+    },
+    {
+      "id": "RA-023",
+      "title": "Inventory other apps as platform modules",
+      "dependsOn": [
+        "RA-020"
+      ],
+      "status": "todo",
+      "owner": null,
+      "acceptance": "Owner-confirmed purpose, domain and authority for each app; L0 manifest per app; overlaps such as LifeDashV5 and Engine Direction resolved to one authority.",
+      "validation": "Owner review of each manifest",
+      "evidence": "Manifests and owner decisions",
+      "program": "atlas",
+      "path": "platform",
+      "automationHold": "Owner deferred app inventory (VQ-007); requires owner review."
+    },
+    {
+      "id": "RA-024",
+      "title": "Remind the owner of open items inside Atlas",
+      "dependsOn": [
+        "RA-003"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "'Waiting on you' list combining agent reminders (versioned in STATE/owner-reminders.json) and the owner's own reminders (local SQLite); count in the header; tick and untick persist; Quick note can add a reminder; Systems shows apps still to dissect; existing notes survive the database upgrade.",
+      "validation": "Unit and HTTP tests including upgrade of a v1 database; browser run: add, tick, reload",
+      "evidence": "Tests and screenshots",
+      "program": "atlas",
+      "path": "platform"
+    },
+    {
+      "id": "RA-025",
+      "title": "Switch between Atlas, the Claude app and Codex without losing context",
+      "dependsOn": [
+        "RA-015",
+        "RA-020"
+      ],
+      "status": "in_progress",
+      "owner": "Claude",
+      "acceptance": "When an intent has no live capability in the platform, Atlas explains why, names the app that can do it, prepares a handoff packet (task, objective, done so far, files, exact next action), copies it and opens the app; returning work appears through pushed checkpoints and progress; every switch is logged by intent.",
+      "validation": "Route web.research and code.edit to a tool; resume in a fresh Claude and Codex session from the packet alone; switch log counts",
+      "evidence": "Handoff packets, switch log and session transcripts",
+      "program": "atlas",
+      "path": "platform"
+    },
+    {
+      "id": "RA-026",
+      "title": "Work on projects from inside Atlas (workbench)",
+      "dependsOn": [
+        "RA-022",
+        "RA-025"
+      ],
+      "status": "todo",
+      "owner": null,
+      "acceptance": "The owner gives an instruction inside Atlas; the chosen workbench (VQ-009) works on a branch, reports progress, commits and pushes; work it cannot do is routed through RA-025; usage limits leave a pushed checkpoint and a reminder.",
+      "validation": "Complete a small repository task from Atlas alone; force a usage limit mid-task and resume elsewhere",
+      "evidence": "End-to-end run with commits and progress log",
+      "program": "atlas",
+      "path": "platform"
+    },
+    {
+      "id": "RA-027",
+      "title": "Reload button and update marker with one-click restart",
+      "dependsOn": [
+        "RA-019"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "A reload button in the header; a marker when service code or unbuilt screen code is newer than the running app; one click rebuilds and restarts through the launcher and reloads the page with drafts intact; without the launcher the marker explains how to restart.",
+      "validation": "Unit tests for change detection and restart exit code; browser run with a stand-in launcher: change code, marker, restart, reload",
+      "evidence": "Tests and screenshots",
+      "program": "atlas",
+      "path": "platform"
+    },
+    {
+      "id": "RA-028",
+      "title": "Map every Engine function into Atlas by cluster",
+      "dependsOn": [
+        "RA-020"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Every Engine module, table, dashboard action and command assigned to one cluster; each cluster has one Atlas home and stays whole; navigation changes and integration order proposed; owner accepts the placement and the merge direction.",
+      "validation": "Full read of the former app at the pinned commit; owner review",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "engine",
+      "note": "Reviewed 2026-10-25: every Engine function has a home in Atlas (RA-047 to RA-052, RA-056 preparation)."
+    },
+    {
+      "id": "RA-029",
+      "title": "Merge Engine into the Atlas repository",
+      "dependsOn": [
+        "RA-003"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "the former app's full history merged; Engine keeps its root layout; both test suites pass together; a reversible Pi switchover that pauses the dev loop, backs up the database, archives pull-request records, installs through Engine's updater and restores settings; the Pi runs Atlas's main.",
+      "validation": "Combined test run; simulated switch and rollback on a copy of Engine at the Pi commit; owner runs the switch on the Pi",
+      "evidence": "Merge commit, test run, simulation log, Pi switch output",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-030",
+      "title": "Make the Pi the authenticated hub over Tailscale",
+      "dependsOn": [
+        "RA-029"
+      ],
+      "status": "done",
+      "owner": "Claude (owner runs the Pi step)",
+      "acceptance": "The hub serves Atlas's API on the tailnet only with a required token (Engine's 'no token, no check' closed); health shows version and adapter state; no public exposure.",
+      "validation": "Requests without or with a wrong token are refused; reachable from a second device on Tailscale; not reachable from outside",
+      "evidence": "STATE/evidence/RA-030.md (owner ran deploy/atlas-hub.sh; PC connected under Systems on 2026-10-20)",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-031",
+      "title": "Local screens on every device talk to the hub",
+      "dependsOn": [
+        "RA-013",
+        "RA-030"
+      ],
+      "status": "todo",
+      "owner": null,
+      "acceptance": "Each device runs the local Atlas screen against the hub; reads are cached and marked stale when the hub is unreachable; new notes queue in an outbox and send once; one writer per dataset.",
+      "validation": "Two devices; hub offline during a save; restart; no duplicates",
+      "evidence": "Multi-device test log",
+      "program": "atlas",
+      "path": "engine",
+      "automationHold": "Owner deferred further mobile work on 2026-10-20; resume only when requested."
+    },
+    {
+      "id": "RA-032",
+      "title": "Programs, paths and functions",
+      "dependsOn": [
+        "RA-020"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Programs nest (Atlas root, Engine and Finance below; Atlas can move under a bigger program); every build task names its program and path; the build view groups by program and path and folds finished work; Engine skill-tree nodes mapped to functions or destinations.",
+      "validation": "Registry nesting tests; task program/path validation; browser check of the build view",
+      "evidence": "docs/MODEL.md, tests and screenshots",
+      "program": "atlas",
+      "path": "platform"
+    },
+    {
+      "id": "RA-033",
+      "title": "Focus-driven skill map with a zoomable view of everything",
+      "dependsOn": [
+        "RA-020",
+        "RA-032"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The map follows the chosen focus and shows its functions, areas and programs, including functions it needs from outside the focus; functions can belong to several focuses; \"Everything\" shows all programs, areas and functions with containment, dependency and same-work links, zoomable and pannable; unbuilt functions dimmed; details on selection; list alternative; the concept map stays available for focuses that have one.",
+      "validation": "Graph and focus tests; browser run through every focus, Everything, zoom, selection, list view and focus memory",
+      "evidence": "Tests and screenshots",
+      "program": "atlas",
+      "path": "visual-universe"
+    },
+    {
+      "id": "RA-034",
+      "title": "Register every Engine function",
+      "dependsOn": [
+        "RA-033"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Every user-facing Engine function registered with its area, effect, source file and dependencies; live only where an Engine test exercises it; where it can be used today and its home section in Atlas; the map distinguishes live in the Engine from reachable on Atlas's screen; routing reports live-but-unreachable functions separately.",
+      "validation": "Registry validation of every evidence path; routing and manifest tests; browser check of the Engine focus, Everything and a selection",
+      "evidence": "modules/engine.json, tests and screenshots",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-035",
+      "title": "Owner attention: answer the Engine from Waiting on you",
+      "dependsOn": [
+        "RA-030",
+        "RA-034"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Waiting on you shows the Engine's decisions, approvals, own tasks, terminal steps and usage-limit stops live through the hub; each can be answered, approved, denied, finished or dismissed from Atlas through the Engine's own functions (logged as the owner, source atlas); Atlas never writes the Engine's database itself.",
+      "validation": "Hub action tests (approve, decide with decision memory, refusal of settled items, token required); client and proxy tests; browser check of answer and removal",
+      "evidence": "STATE/evidence/RA-035.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-036",
+      "title": "Brain: Quick note writes to the Engine's brain",
+      "dependsOn": [
+        "RA-035"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Quick note can send a thought to the Engine (default when the hub is online), shows the Engine's reply with where every item went, and Notes lists recent thoughts with what each became and an Undo; local notes and reminders still work offline.",
+      "validation": "Hub tests for write (model mocked and unavailable), recent thoughts with titles, undo and bad input; browser check of send, list and undo",
+      "evidence": "STATE/evidence/RA-036.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-037",
+      "title": "Direction: the Engine's focus and next steps in Atlas",
+      "dependsOn": [
+        "RA-036"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The Focus panel shows the Engine's focus, next step (with owner) and destination goal instead of synthetic text when the hub is online; the Focus page lists the ranked next steps with the reasons for each rank, where the work leads (heading, for you, to steer, to think, goal progress) and lets the owner change the build focus, which re-ranks at once.",
+      "validation": "Hub tests for next steps with reasons, focus with destination, zoom-out on a copy (reads never write), set focus logged as the owner and invalid focus refused; browser check of panel, page and focus change",
+      "evidence": "STATE/evidence/RA-037.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-038",
+      "title": "One Update button for this computer and the Pi",
+      "dependsOn": [
+        "RA-030"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The header shows when this computer or the Pi has updates waiting; one button installs both: the Pi through Engine's updater (tests first, outside the hub's own service so the restart cannot stop it, progress reported back), this computer by fast-forward then a restart through Start Atlas.cmd, which rebuilds the screen. Hand-made changes or local commits block an install with an explanation; nothing is overwritten. Other screens load from the Pi and follow it.",
+      "validation": "Git round trip in a temporary repository (check, apply, blocked by hand-made changes); hub status, check, single running update, runner success and failure; Atlas endpoints without a hub; browser check of the panel",
+      "evidence": "STATE/evidence/RA-038.md",
+      "program": "atlas",
+      "path": "platform"
+    },
+    {
+      "id": "RA-039",
+      "title": "Forge › Ideas: place ideas and add them to the plan",
+      "dependsOn": [
+        "RA-037"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Forge appears in the navigation with stages Ideas, Plan, Build. Ideas lists every open Engine idea with where it fits (goal or new goal, by Claude or by rule, with the reason) and any overlap note; each can be added to the plan under a goal, started as a new goal, or set aside (kept, undoable); Claude can be asked to place all ideas. Ideas never become loose tasks or go to the agent directly. Reading never changes the Engine's data.",
+      "validation": "Hub tests (view on a copy leaves the database unchanged; add to plan; new goal; set aside; refusals; place without a model); browser check",
+      "evidence": "STATE/evidence/RA-039.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-040",
+      "title": "Focus on big directions; the Forge inherits the focus",
+      "dependsOn": [
+        "RA-037",
+        "RA-039"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Focus shows the owner's directions (year or lifetime goals) on their timeline with progress, momentum and goals under them, a recommended focus with its reasons, a way to create directions and place loose goals; choosing a direction makes Engine's own ranking put its work first. Forge › Plan shows the inherited focus, the ranked next steps (In focus / Everything) with reasons, where the work leads and the build mode.",
+      "validation": "tests/test_compass.py (directions, recommendation, focus bonus and explanation, creation, placing, undo); hub tests (create, place, choose, in-focus flags, refusal of a sub-goal); browser check of Focus and Forge › Plan",
+      "evidence": "STATE/evidence/RA-040.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-042",
+      "title": "One name, stage 4: the Pi's folder, branch, services and database",
+      "dependsOn": [
+        "RA-055"
+      ],
+      "status": "review",
+      "owner": "Claude (owner runs one script on the Pi)",
+      "acceptance": "The Pi's checkout lives under an Atlas name (for example ~/atlas) on branch main; hq.service, atlas-hub.service, the recovery timer and the cron schedules point to it; the old path keeps working as a link until nothing uses it; nothing in memory/ or .env is lost. One script with a dry run and rollback, like deploy/switch_to_atlas.py.",
+      "validation": "Dry run lists every unit, cron line and path it changes; script tests on a temporary home; after the move: update, hub health and dashboard work",
+      "evidence": "STATE/evidence/RA-042.md",
+      "program": "atlas",
+      "path": "one-name",
+      "note": "2026-10-26: deploy/move_to_atlas_folder.py (dry run, move, rollback, status, drop-link) built and tested on a temporary home (tests/test_move_folder.py). Open: the owner runs it on the Pi; database file name hq.db kept (follow-up)."
+    },
+    {
+      "id": "RA-041",
+      "title": "Vision page: lifetime visions, the focus and year objectives",
+      "dependsOn": [
+        "RA-040"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Focus shows lifetime visions in big words, the focus among them recommended over a longer timeline with reasons, and the year objectives under each; year goals not yet under a vision can be placed; no tasks or queue on this page.",
+      "validation": "Engine tests for visions and objectives; browser check",
+      "evidence": "STATE/evidence/RA-041.md",
+      "program": "atlas",
+      "path": "vision"
+    },
+    {
+      "id": "RA-053",
+      "title": "One name, stage 1: everything the owner sees says Atlas",
+      "dependsOn": [
+        "RA-029"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "No screen, Telegram message, CLI output, brief or notification shows the former HQ name; the always-on part is called the Engine.",
+      "validation": "A test scans user-facing strings; Telegram and CLI messages checked",
+      "evidence": "STATE/evidence/RA-053.md",
+      "program": "atlas",
+      "path": "one-name"
+    },
+    {
+      "id": "RA-043",
+      "title": "Forge › Build: the build controls",
+      "dependsOn": [
+        "RA-039"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Queue (yours first, then proposals), build approvals, start / pause / stop and limits of the builder, quick build, pull requests with conflicts and delivery, Claude login state; each through the Engine's own functions, logged and undoable where the Engine allows.",
+      "validation": "Hub tests per action; browser check",
+      "evidence": "STATE/evidence/RA-043.md",
+      "program": "atlas",
+      "path": "forge"
+    },
+    {
+      "id": "RA-044",
+      "title": "Build progress: a visual live view of everything being built",
+      "dependsOn": [
+        "RA-043"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Every lane (Atlas's agents and the Engine's builder) with program, path, step and live console; Atlas's own path first until its original plan is done; recently finished work folds away; links to Forge › Build to act.",
+      "validation": "Browser check with a running lane and an idle state",
+      "evidence": "STATE/evidence/RA-044.md",
+      "program": "atlas",
+      "path": "live-build"
+    },
+    {
+      "id": "RA-045",
+      "title": "Forge › Plan complete: goals, tasks, editing, overview, do-over",
+      "dependsOn": [
+        "RA-041"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Quarter and month goals under the focus, tasks with edit, reorder, status and task detail, overlap and prerequisites, the whole-plan do-over with approval.",
+      "validation": "Hub tests; browser check",
+      "evidence": "STATE/evidence/RA-045.md",
+      "program": "atlas",
+      "path": "forge"
+    },
+    {
+      "id": "RA-046",
+      "title": "Today: brief, progress and weekly review",
+      "dependsOn": [
+        "RA-041"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The daily brief, progress per path and the weekly review in Waiting on you and Build progress.",
+      "validation": "Hub tests; browser check",
+      "evidence": "STATE/evidence/RA-046.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-047",
+      "title": "Skill tree from the Engine on the Map",
+      "dependsOn": [
+        "RA-033"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Nodes with state and proof, confirm or dismiss, research how, automatic linking.",
+      "validation": "Hub tests; browser check",
+      "evidence": "STATE/evidence/RA-047.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-048",
+      "title": "Research: feed, saved, deep research, sources and limits",
+      "dependsOn": [
+        "RA-030"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The Engine's research feed and deep research in Atlas's Research section.",
+      "validation": "Hub tests; browser check",
+      "evidence": "STATE/evidence/RA-048.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-049",
+      "title": "Resources and the arsenal",
+      "dependsOn": [
+        "RA-030"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Everything the owner has and has built, searchable for reuse.",
+      "validation": "Hub tests; browser check",
+      "evidence": "STATE/evidence/RA-049.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-050",
+      "title": "Memory: lessons, decisions, change log",
+      "dependsOn": [
+        "RA-030"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The Engine's memory in Atlas's Memory section with search and the change log with undo.",
+      "validation": "Hub tests; browser check",
+      "evidence": "STATE/evidence/RA-050.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-051",
+      "title": "Systems: usage, kill switch, budgets, models, repairs, reviews",
+      "dependsOn": [
+        "RA-030"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The Engine's self-maintenance functions under Systems, including the constitution (read-only) and voice set-up.",
+      "validation": "Hub tests; browser check",
+      "evidence": "STATE/evidence/RA-051.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-052",
+      "title": "Brain complete: voice, links and files, ask Claude, phone",
+      "dependsOn": [
+        "RA-036"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Speak a thought, drop a link, image or PDF, ask about the plan; Telegram works under Atlas's name.",
+      "validation": "Hub tests; browser check",
+      "evidence": "STATE/evidence/RA-052.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-054",
+      "title": "One name, stage 2: documents and agents",
+      "dependsOn": [
+        "RA-053"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Docs, decision records, CLAUDE.md/AGENTS.md and agent prompts use Atlas and Engine; history keeps a note of the old name.",
+      "validation": "Scan of docs and prompts",
+      "evidence": "STATE/evidence/RA-054.md",
+      "program": "atlas",
+      "path": "one-name"
+    },
+    {
+      "id": "RA-055",
+      "title": "One name, stage 3: code and commands",
+      "dependsOn": [
+        "RA-054"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The hq package and hq.sh have Atlas names; old names remain as thin aliases until nothing uses them.",
+      "validation": "Full test suite; the Pi's updater and dev loop run on the new names",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "one-name",
+      "note": "Reviewed 2026-10-25: merged into main by the owner (PR #8)."
+    },
+    {
+      "id": "RA-056",
+      "title": "Retire the old dashboard",
+      "dependsOn": [
+        "RA-043",
+        "RA-044",
+        "RA-045",
+        "RA-046",
+        "RA-047",
+        "RA-048",
+        "RA-049",
+        "RA-050",
+        "RA-051",
+        "RA-052",
+        "RA-031"
+      ],
+      "status": "todo",
+      "owner": "Claude",
+      "acceptance": "Every function has its home in Atlas, including on the phone (RA-031: the phone used the old dashboard); the old dashboard is switched off with the owner's approval.",
+      "validation": "Function map shows every function reachable in Atlas",
+      "evidence": "STATE/evidence/RA-056.md",
+      "program": "atlas",
+      "path": "one-name",
+      "automationHold": "Legacy dashboard retirement requires owner approval and accepted mobile access."
+    },
+    {
+      "id": "RA-057",
+      "title": "Clear out what the redesign made outdated",
+      "dependsOn": [
+        "RA-045"
+      ],
+      "status": "done",
+      "owner": "Claude (owner approves the result)",
+      "acceptance": "Every open Engine task and idea is re-checked against the new structure (visions, Forge, one name) with the Engine's own do-over and revisit functions: keep, change, merge, done or drop, each with a reason, applied only after the owner approves the diff and undoable. Old items such as 'find out why dev-loop branches get merge conflicts' are judged against what exists now. Runs again after each major change, so recorded ideas do not go stale.",
+      "validation": "Do-over diff reviewed in Forge › Plan; undo works; a rule triggers it after large changes",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "forge",
+      "note": "Reviewed 2026-10-25: merged and live; the re-check itself appears on Today for the owner whenever the structure changes."
+    },
+    {
+      "id": "RA-058",
+      "title": "The brain as the main way to talk to Atlas",
+      "dependsOn": [
+        "RA-052"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The owner can talk to Atlas the way he talks to Claude: typed or spoken thoughts are sorted into visions, objectives, plan goals, tasks, ideas, skill-tree nodes or memories as fits, with a short confirmation of what changed and where, and undo; questions get answers grounded in the plan; Telegram and the app use the same brain.",
+      "validation": "Hub and Engine tests with a mocked model; browser check of a spoken and a typed thought becoming the right items",
+      "evidence": "STATE/evidence/RA-058.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-060",
+      "title": "Placement revised: Today, Library map, Systems as connections, Horizon apart",
+      "dependsOn": [
+        "RA-045"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Owner's placement of 2026-10-20 applied (ADR-025): Today holds what needs the owner; Notes only thoughts; Map in the Library; Systems only connections; Horizon groups the long-term research vision apart from Atlas.",
+      "validation": "Browser check of every moved section",
+      "evidence": "STATE/evidence/RA-060.md",
+      "program": "atlas",
+      "path": "platform"
+    },
+    {
+      "id": "RA-059",
+      "title": "The system reviews where its functions belong",
+      "dependsOn": [],
+      "status": "done",
+      "owner": "Claude (owner approves proposals)",
+      "acceptance": "The Engine's monthly revisit also reads Atlas's function registry and docs/STRUCTURE.md and proposes moves, merges and removals of functions between sections (duplicates, wrong layer, unused), each with a reason as a draft the owner accepts; it runs again after every large restructuring.",
+      "validation": "Engine tests with a mocked model: a duplicated function and a misplaced one produce proposals; nothing changes without approval",
+      "evidence": "STATE/evidence/RA-059.md",
+      "program": "atlas",
+      "path": "platform"
+    },
+    {
+      "id": "RA-061",
+      "title": "The builder builds into Atlas's screen, not the old dashboard",
+      "dependsOn": [],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The dev loop's prompt, the overlap check and quick build point the builder at Atlas (apps/web, services/atlas, modules, docs/STRUCTURE.md) for anything the owner sees; the old dashboard is frozen. The top-bar search the builder made in the old dashboard on 2026-10-20 (#99, #100; commit 65441d6) is rebuilt in Atlas's header (search functions, tasks, ideas, notes; jump to the best match).",
+      "validation": "A test checks the dev-loop prompt names apps/web; browser check of the search in Atlas",
+      "evidence": "STATE/evidence/RA-061.md",
+      "program": "atlas",
+      "path": "forge"
+    },
+    {
+      "id": "RA-062",
+      "title": "Forge reworked: the plan is the database, Build merged with Build progress",
+      "dependsOn": [
+        "RA-045",
+        "RA-044"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Plan keeps all tasks with ★ Important, Build, Done and Delete; important work ranks first and the builder takes it next; Forge › Build shows the live build, a short Up next, pull requests and recently finished, with settings folded; Build progress leaves the menu; the Forge glows red while building; a Build card above Quick note opens Forge › Build; Ideas · Plan · Build are clear workflow stations.",
+      "validation": "Hub test for important (ranking, builder queue, undo, back to normal); browser check of Build, the card, the glow and the star",
+      "evidence": "STATE/evidence/RA-062.md",
+      "program": "atlas",
+      "path": "forge"
+    },
+    {
+      "id": "RA-063",
+      "title": "The system re-evaluates itself automatically, and says so in short",
+      "dependsOn": [
+        "RA-059"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Re-ranking stays rule-based after every change; Claude re-evaluates the plan daily and after real change within budget; placement is reviewed weekly; before each build the same overlap call judges whether the task is still worth building now against the focus and the plan and asks once when not; re-evaluations show on Today as a short title and summary with the changes folded.",
+      "validation": "tests/test_worth.py, SmartOverlayer, test_doover; browser check",
+      "evidence": "STATE/evidence/RA-063.md",
+      "program": "atlas",
+      "path": "forge"
+    },
+    {
+      "id": "RA-064",
+      "title": "Re-evaluation top-down, a roomier plan, ideas as a brainstorming room",
+      "dependsOn": [
+        "RA-063"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The re-evaluation judges goals and tasks top-down against the visions and what Atlas is now, and can reshape goals; the owner's button always drafts a full re-evaluation; the plan uses the full width without Next up; ideas can be explored in depth and taken into the plan as task or goal by the AI's judgement.",
+      "validation": "Engine and hub tests; browser check",
+      "evidence": "STATE/evidence/RA-064.md",
+      "program": "atlas",
+      "path": "forge"
+    },
+    {
+      "id": "RA-065",
+      "title": "Atlas build plan as the builder's priority, usage-limit wait, optional auto-merge",
+      "dependsOn": [],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Pinned RA card in Forge › Plan with Queue and an auto-merge switch; runs wait for the usage limit to reset.",
+      "validation": "tests/test_atlasplan.py",
+      "evidence": "STATE/evidence/RA-065.md",
+      "program": "atlas",
+      "path": "forge"
+    },
+    {
+      "id": "RA-066",
+      "title": "Serve the existing Atlas screen on mobile and curate Pi App Hub",
+      "dependsOn": [
+        "RA-030"
+      ],
+      "status": "done",
+      "owner": "Codex",
+      "acceptance": "Existing Atlas interface available privately over HTTPS; Hub contains genuine applications without duplicate infrastructure entries; application data preserved.",
+      "validation": "Access boundary tests, mobile browser checks, live links and service checks",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "foundation",
+      "note": "Reviewed 2026-10-25: merged and in use on the phone."
+    },
+    {
+      "id": "RA-067",
+      "title": "Queue individual RA steps and explain builder waiting and settings",
+      "dependsOn": [
+        "RA-065"
+      ],
+      "status": "done",
+      "owner": "Codex",
+      "acceptance": "Forge shows individual RA task mappings and dependencies, accurate Claude reset and automatic retry state, and a discoverable settings gear.",
+      "validation": "Synthetic queue and reset tests; browser workflow; live queue inspection",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "forge",
+      "note": "Closed 2026-10-25: the waiting and settings parts stay; the separate RA queue was replaced by RA-068 at the owner's request."
+    },
+    {
+      "id": "RA-068",
+      "title": "RA steps live in the plan; plan statuses follow the repository; PC realigns after a history rewrite",
+      "dependsOn": [],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "No separate RA queue; each open RA step is a plan task under one goal whose status follows STATE/tasks.json automatically; the PC update no longer counts rewritten commits as waiting.",
+      "validation": "tests/test_atlasplan.py, tests/test_selfupdate.py; full suite",
+      "evidence": "STATE/evidence/RA-068.md",
+      "program": "atlas",
+      "path": "forge"
+    },
+    {
+      "id": "RA-069",
+      "title": "Voice on the PC's own hardware, no Pi CPU; hardware as live resources; chat thread in Quick note",
+      "dependsOn": [],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The Pi never transcribes; Atlas on the PC runs Whisper locally, set up under Systems › Voice; machines report themselves as live resources while written resources stay editable; answers appear as a conversation in Quick note.",
+      "validation": "tests/test_hardware.py, tests/test_voicesetup.py, tests/test_hub.py; browser check",
+      "evidence": "STATE/evidence/RA-069.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-070",
+      "title": "Pick and order what the builder builds; Brain screen",
+      "dependsOn": [],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Build on every open plan task (⚠ with the reason when it waits on another task) puts it fifth in the builder's queue; Up next shows 5 or 10 and can be dragged; the whole build order opens in its own window; a Brain screen under Forge for reasoning with the system's brain.",
+      "validation": "tests/test_hub.py test_build_queue_order_and_place; browser check",
+      "evidence": "STATE/evidence/RA-070.md",
+      "program": "atlas",
+      "path": "forge"
+    },
+    {
+      "id": "RA-071",
+      "title": "Vision → Goal → Task: deadlines instead of time layers, goals edited in Focus",
+      "dependsOn": [],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "No year/quarter/month/week layers; a goal may carry a deadline the owner sets; only that deadline (with the vision in focus) raises its tasks' priority; goals are added, renamed, dated and set aside in Focus.",
+      "validation": "tests/test_compass.py test_only_a_deadline_raises_priority; tests/test_talk.py; browser check",
+      "evidence": "STATE/evidence/RA-071.md",
+      "program": "atlas",
+      "path": "vision"
+    },
+    {
+      "id": "RA-072",
+      "title": "Cortex: the reasoning core's name, with a nickname",
+      "dependsOn": [],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The Brain screen and every place that names the reasoning core say Cortex, or the nickname the owner gives it on the first visit; the core answers to the name; function ids keep brain.",
+      "validation": "tests/test_hub.py test_cortex_name; browser check",
+      "evidence": "STATE/evidence/RA-072.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-073",
+      "title": "Mockups made in Claude or ChatGPT, shown in Atlas",
+      "dependsOn": [],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Atlas no longer draws mockups: it writes the request, opens Claude or ChatGPT with it, and takes the result back as a picture (paste, drop, file, clipboard) or HTML; each is a round; approval still holds and releases the build, and the builder can open the approved picture.",
+      "validation": "tests/test_mockup.py; browser check",
+      "evidence": "STATE/evidence/RA-073.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-074",
+      "title": "Cortex as one full-window chat",
+      "dependsOn": [
+        "RA-073"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The Cortex screen is a single chat like Claude or ChatGPT: Enter sends, Shift+Enter breaks a line, the box grows, answers render Markdown, copy/edit/ask again/retry, draft kept, new conversation, typing indicator, jump to latest; mockups and mockup choices appear in the conversation, not in side panels.",
+      "validation": "tests/test_hub.py test_new_conversation; browser check (desktop and phone)",
+      "evidence": "STATE/evidence/RA-074.md",
+      "program": "atlas",
+      "path": "apps/web"
+    },
+    {
+      "id": "RA-075",
+      "title": "Speak to Cortex from any screen, with 1 · 2 · 3 approvals",
+      "dependsOn": [
+        "RA-074"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "A magic Cortex button in the header (Ctrl+J) reads the screen, proposes up to three numbered actions, goes to the section and highlights the item while proposing, and runs one only after Yes / 1 / 2 / 3 (N or Esc declines), with Undo; the first item in Waiting on you answers with 1 · 2 · 3.",
+      "validation": "tests/test_screen.py; browser check (desktop and phone)",
+      "evidence": "STATE/evidence/RA-075.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-076",
+      "title": "Build › Live: plain steps by default, real output on request",
+      "dependsOn": [],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The live console shows plain steps (Reading 2 files, Running the tests, Saving the work) and the agent's latest words, the current step visibly active (bounce, shimmer, caret); a small >_ Output button switches to the real command output and is remembered.",
+      "validation": "browser check with a running log",
+      "evidence": "STATE/evidence/RA-076.md",
+      "program": "atlas",
+      "path": "apps/web"
+    },
+    {
+      "id": "RA-077",
+      "title": "Quick ✦ Cortex vs the full Cortex chat; conversations; mockups only when chatting",
+      "dependsOn": [
+        "RA-075"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The ✦ button does what Quick note does plus finding (1–5 opens a hit, ← → moves between them), quick answers with numbered choices and a few small changes, and suggests the chat when it becomes a conversation; the Cortex chat can propose any owner action, asks back with choices, offers a mockup only when an idea in the conversation has a visual side, has no Reason/File/Auto buttons, and keeps earlier conversations behind a faint button.",
+      "validation": "tests/test_screen.py, tests/test_hub.py test_new_conversation; browser check",
+      "evidence": "STATE/evidence/RA-077.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-078",
+      "title": "Quick note box removed; the ✦ button takes its place",
+      "dependsOn": [
+        "RA-077"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "The Quick note panel is gone from the right rail; the ✦ button keeps every Quick note function (Atlas, This computer, Reminder, 📎 and drop, voice with the hearing switch, a draft kept over reloads) and works without the hub for local notes and reminders.",
+      "validation": "browser check",
+      "evidence": "STATE/evidence/RA-078.md",
+      "program": "atlas",
+      "path": "apps/web"
+    },
+    {
+      "id": "RA-079",
+      "title": "✦ decides by itself; Settings and Agents tabs; no 1·2·3 on Today",
+      "dependsOn": [
+        "RA-078"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "✦ has no kind buttons: Cortex decides (kept in Cortex, reminder, found, answer, proposal) and the result's colour shows which; no voice-system button; a tiny attach; shortcuts set under Systems › Settings (open ✦, start speaking unassigned, open the chat); Settings lists every setting with a link to where it lives; Today has no number-key approvals; Systems › Agents lists coding agents as switchable resources with order, state and a hand-over prompt.",
+      "validation": "tests/test_screen.py, tests/test_agents.py; browser check",
+      "evidence": "STATE/evidence/RA-079.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-080",
+      "title": "Builder falls back to the next ready coding agent when Claude is out",
+      "dependsOn": [
+        "RA-079"
+      ],
+      "status": "ready",
+      "owner": null,
+      "acceptance": "When Claude's usage limit is reached, the dev loop runs the next ready agent from engine/agents.py (first Codex CLI, `codex exec`) on the same task with the hand-over prompt, logs which agent built it, and returns to Claude after the reset; nothing changes when no other agent is installed.",
+      "validation": "tests with a mocked agent command; one real run on the Pi",
+      "evidence": "STATE/evidence/RA-080.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-081",
+      "title": "One numbering in ✦ and the chat; quick exchanges saved only on request",
+      "dependsOn": [
+        "RA-079"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Choices and proposals share one numbering (choices first), so no number appears twice; no Yes/No row (click or press the number, Esc dismisses); a ✦ exchange is not written into the Cortex conversation unless the owner presses Continue in the chat, which saves it as a conversation.",
+      "validation": "tests/test_screen.py; browser check",
+      "evidence": "STATE/evidence/RA-081.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-082",
+      "title": "Cortex answer quality: per-job model and thinking, no forced brevity, sees matching tasks",
+      "dependsOn": [],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "[models.jobs.<job>] in the constitution can set model, thinking_tokens, max_tokens and claude_code_model for one job (e.g. chat on Opus with thinking); Cortex is no longer told to be concise; besides the top 40 open tasks it sees tasks matching the conversation and the total count.",
+      "validation": "tests/test_models_jobs.py",
+      "evidence": "STATE/evidence/RA-082.md",
+      "program": "atlas",
+      "path": "engine"
+    },
+    {
+      "id": "RA-083",
+      "title": "Cortex chat on Claude Code: streaming, real turns, web search, Atlas look-ups, files",
+      "dependsOn": [
+        "RA-082"
+      ],
+      "status": "done",
+      "owner": "Claude",
+      "acceptance": "Without an API key, the Cortex chat streams its answer, keeps one Claude Code session per conversation, can search the web, looks things up in Atlas through a read-only MCP server, reads files attached to the conversation, finds earlier conversations, follows a full Cortex brief, and changes nothing except through numbered proposals; it falls back to the one-shot answer when Claude Code is unavailable.",
+      "validation": "tests/test_cortex.py; browser check with a stand-in Claude Code",
+      "evidence": "STATE/evidence/RA-083.md",
+      "program": "atlas",
+      "path": "engine"
+    }
+  ],
+  "paths": [
+    {
+      "id": "foundation",
+      "program": "atlas",
+      "name": "Foundation",
+      "summary": "Blueprint, reference, contracts and the local app"
+    },
+    {
+      "id": "visual-universe",
+      "program": "atlas",
+      "name": "Visual universe",
+      "summary": "The map, intake, search and skill tree on screen"
+    },
+    {
+      "id": "engine",
+      "program": "atlas",
+      "name": "Engine integration",
+      "summary": "The former the Engine's functions brought into Atlas, cluster by cluster"
+    },
+    {
+      "id": "platform",
+      "program": "atlas",
+      "name": "Platform",
+      "summary": "Programs, functions, switching apps and building from Atlas"
+    },
+    {
+      "id": "memory",
+      "program": "atlas",
+      "name": "Memory and Vision Room",
+      "summary": "Source-grounded memory, corrections and persistent questions"
+    },
+    {
+      "id": "continuity",
+      "program": "atlas",
+      "name": "Continuity and release",
+      "summary": "Offline use, the Pi, recovery and switching sessions safely"
+    },
+    {
+      "id": "vision",
+      "program": "atlas",
+      "name": "Vision and focus",
+      "summary": "Lifetime visions, the focus among them and its recommendation"
+    },
+    {
+      "id": "forge",
+      "program": "atlas",
+      "name": "Forge",
+      "summary": "Ideas, plan and the build controls, following the focus"
+    },
+    {
+      "id": "live-build",
+      "program": "atlas",
+      "name": "Build progress",
+      "summary": "A visual live picture of everything being built"
+    },
+    {
+      "id": "one-name",
+      "program": "atlas",
+      "name": "One name",
+      "summary": "Retire the Engine name everywhere, in four stages"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "description": "Focuses select which functions the map shows. A focus can include whole programs, areas (program.domain) or single functions, so functions can belong to several focuses. 'concepts' adds the research concept map. Edit freely; the owner's current focus is marked current.",
+  "focuses": [
+    {
+      "id": "cross-domain-reasoning",
+      "name": "Cross-domain reasoning",
+      "summary": "Discover cross-domain reasoning methods (research map, synthetic). Horizon: a long-term research direction, outside the build plan.",
+      "concepts": "research-map",
+      "functions": [
+        "engine.research.find_options",
+        "engine.research.sourced_summary",
+        "engine.memory.recall",
+        "engine.memory.record_lesson",
+        "engine.brain.write_thought",
+        "atlas.notes.list",
+        "atlas.notes.save",
+        "claude-desktop.workbench.web_research"
+      ],
+      "horizon": true
+    },
+    {
+      "id": "building-atlas",
+      "name": "Building Atlas",
+      "summary": "Everything involved in building and running Atlas itself.",
+      "programs": [
+        "atlas"
+      ],
+      "domains": [
+        "engine.build",
+        "engine.attention"
+      ],
+      "functions": [
+        "claude-desktop.workbench.edit_repository",
+        "codex.workbench.edit_repository",
+        "engine.system.kill_switch"
+      ],
+      "current": true
+    },
+    {
+      "id": "engine-into-atlas",
+      "name": "Engine into Atlas",
+      "summary": "Bringing every Engine  function into Atlas.",
+      "programs": [
+        "engine"
+      ]
+    },
+    {
+      "id": "finance",
+      "name": "Finance",
+      "summary": "The financial vault as its own section (to be dissected).",
+      "programs": [
+        "finance"
+      ]
+    }
+  ]
+}

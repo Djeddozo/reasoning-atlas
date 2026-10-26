@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "id": "atlas",
+  "name": "Reasoning Atlas",
+  "kind": "platform",
+  "integrationLevel": "L4",
+  "summary": "The root program today: one window for notes, reminders, maps, building and every sub-program. Can itself become part of a bigger program later (docs/MODEL.md).",
+  "repository": "Djeddozo/Unconventional-Reasoning-Atlas",
+  "runsOn": "Windows (local service); Raspberry Pi (private Tailscale mobile screen)",
+  "domains": [
+    {
+      "id": "notes",
+      "name": "Notes",
+      "summary": "Capture and keep the owner's notes on this computer."
+    },
+    {
+      "id": "sources",
+      "name": "Sources",
+      "summary": "Local files and note texts kept as originals with provenance."
+    },
+    {
+      "id": "reminders",
+      "name": "Reminders",
+      "summary": "What is waiting on the owner, from agents and from the owner."
+    },
+    {
+      "id": "progress",
+      "name": "Build progress",
+      "summary": "Live construction status reported by agents."
+    },
+    {
+      "id": "registry",
+      "name": "Capability registry",
+      "summary": "Which module can do what, and where to switch when Atlas cannot."
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "atlas.notes.list",
+      "domain": "notes",
+      "summary": "List saved notes, newest first.",
+      "effect": "read",
+      "status": "live",
+      "intent": "notes.read",
+      "evidence": "STATE/evidence/RA-003.md",
+      "source": "services/atlas/server.py",
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "notes": {
+            "type": "array"
+          }
+        }
+      },
+      "atlasSection": "Notes"
+    },
+    {
+      "id": "atlas.notes.save",
+      "domain": "notes",
+      "summary": "Save a note with an idempotent client identifier.",
+      "effect": "act",
+      "status": "live",
+      "intent": "notes.write",
+      "evidence": "STATE/evidence/RA-003.md",
+      "source": "services/atlas/server.py",
+      "inputs": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          }
+        }
+      },
+      "note": "Owner-initiated in the app; other modules need owner approval.",
+      "requires": [
+        "atlas.notes.list"
+      ],
+      "atlasSection": "Notes"
+    },
+    {
+      "id": "atlas.notes.sync",
+      "domain": "notes",
+      "summary": "Keep notes on the PC and the Pi in step: the Pi's hub is the single authority with revisions and tombstones; offline edits wait in a durable outbox, a lost acknowledgment never applies twice, and concurrent edits become visible conflicts with both versions kept.",
+      "effect": "act",
+      "status": "tested",
+      "intent": "notes.sync",
+      "evidence": "STATE/evidence/RA-013.md",
+      "source": "services/atlas/sync.py",
+      "atlasSection": "Systems"
+    },
+    {
+      "id": "atlas.sources.import",
+      "summary": "Keep a local file (text, Markdown, CSV, JSON, PDF or image up to 10 MB) with its original bytes, SHA-256, media type and arrival time; the same content is kept once.",
+      "effect": "act",
+      "intent": "sources.write",
+      "domain": "sources",
+      "status": "tested",
+      "evidence": "STATE/evidence/RA-005.md",
+      "source": "services/atlas/intake.py",
+      "atlasSection": "Notes",
+      "inputs": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          }
+        }
+      },
+      "note": "Owner-initiated in Quick note (This computer + attach). Imported content is data, never an instruction.",
+      "requires": [
+        "atlas.sources.list"
+      ]
+    },
+    {
+      "id": "atlas.sources.list",
+      "summary": "List local sources and note provenance with hash, status and import count; return an original unchanged.",
+      "effect": "read",
+      "intent": "sources.read",
+      "domain": "sources",
+      "status": "tested",
+      "evidence": "STATE/evidence/RA-005.md",
+      "source": "services/atlas/intake.py",
+      "atlasSection": "Notes"
+    },
+    {
+      "id": "atlas.sources.resume",
+      "summary": "Resume source processing that a crash or failure interrupted, at every start and on request.",
+      "effect": "act",
+      "intent": "sources.resume",
+      "domain": "sources",
+      "status": "tested",
+      "evidence": "STATE/evidence/RA-005.md",
+      "source": "services/atlas/intake.py",
+      "atlasSection": "Notes"
+    },
+    {
+      "id": "atlas.reminders.list",
+      "domain": "reminders",
+      "summary": "List open and completed reminders for the owner.",
+      "effect": "read",
+      "status": "live",
+      "intent": "reminders.read",
+      "evidence": "STATE/evidence/RA-024.md",
+      "source": "services/atlas/reminders.py",
+      "atlasSection": "Today"
+    },
+    {
+      "id": "atlas.reminders.add",
+      "domain": "reminders",
+      "summary": "Add a reminder that appears under Waiting on you.",
+      "effect": "propose",
+      "status": "live",
+      "intent": "reminders.write",
+      "evidence": "STATE/evidence/RA-024.md",
+      "source": "services/atlas/reminders.py",
+      "inputs": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "requires": [
+        "atlas.reminders.list"
+      ],
+      "atlasSection": "Today"
+    },
+    {
+      "id": "atlas.progress.read",
+      "domain": "progress",
+      "summary": "Read the active build task, step and percentage.",
+      "effect": "read",
+      "status": "live",
+      "intent": "progress.read",
+      "evidence": "STATE/evidence/RA-019.md",
+      "source": "services/atlas/progress.py",
+      "atlasSection": "Forge › Build"
+    },
+    {
+      "id": "atlas.registry.resolve",
+      "domain": "registry",
+      "summary": "Decide whether an intent can run in Atlas or must switch to another app.",
+      "effect": "read",
+      "status": "tested",
+      "intent": "platform.route",
+      "evidence": "tests/test_modules.py",
+      "source": "packages/contracts/modules.py",
+      "inputs": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string"
+          }
+        }
+      },
+      "atlasSection": "Forge › Build"
+    },
+    {
+      "id": "atlas.registry.mobile",
+      "domain": "registry",
+      "summary": "Open the existing Atlas screen over private HTTPS using the owner’s Tailscale identity.",
+      "effect": "read",
+      "status": "tested",
+      "intent": "atlas.mobile.open",
+      "evidence": "STATE/evidence/RA-066.md",
+      "source": "services/atlas/server.py",
+      "atlasSection": "Systems"
+    },
+    {
+      "id": "atlas.progress.resume",
+      "domain": "progress",
+      "summary": "Rebuild where a stopped task stands from the repository alone and keep external effects from repeating after a usage cap or app switch.",
+      "effect": "read",
+      "status": "tested",
+      "intent": "code.resume",
+      "evidence": "STATE/evidence/RA-015.md",
+      "source": "services/atlas/continuity.py",
+      "atlasSection": "Forge › Build"
+    },
+    {
+      "id": "atlas.registry.call",
+      "domain": "registry",
+      "summary": "Call another module's capability by its registry id: reads run through the module's adapter with provenance on every result; proposals need a preview and one confirmation; act capabilities stay disabled; an offline module fails visibly. Every call is logged and audited.",
+      "effect": "propose",
+      "status": "tested",
+      "intent": "platform.call",
+      "evidence": "tests/test_capabilities.py",
+      "source": "services/atlas/capabilities.py",
+      "inputs": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "inputs": {
+            "type": "object"
+          },
+          "callId": {
+            "type": "string"
+          },
+          "repeat": {
+            "type": "boolean"
+          }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "result": {}
+        }
+      },
+      "note": "Not used by the screen yet: sections still reach the Engine through /api/engine. Moving them onto the registry is a follow-up.",
+      "requires": [
+        "atlas.registry.resolve"
+      ],
+      "atlasSection": "Systems"
+    }
+  ],
+  "parent": null
+}

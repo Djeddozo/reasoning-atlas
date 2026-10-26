@@ -1,0 +1,14 @@
+# Checkpoint
+- Task ID:
+- UTC timestamp:
+- Agent/app and session:
+- Branch and commit:
+- Objective:
+- Completed since previous checkpoint:
+- Changed files:
+- Checks and results:
+- Not run / reason:
+- External actions and known/unknown outcomes:
+- Blockers:
+- Exact next action:
+- Resumption requirements:

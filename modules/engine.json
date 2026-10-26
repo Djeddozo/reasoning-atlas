@@ -1,0 +1,2168 @@
+{
+  "schemaVersion": 1,
+  "id": "engine",
+  "name": "Engine ",
+  "kind": "app",
+  "integrationLevel": "L0",
+  "summary": "Atlas's always-on engine on the Raspberry Pi, formerly the separate the Engine. Its functions run there today (Engine dashboard, Telegram, command line, automatic jobs); Atlas's screen reaches them once the hub connection exists (RA-030).",
+  "repository": "Djeddozo/Unconventional-Reasoning-Atlas (engine/ package, old name hq/; formerly Djeddozo/the former app)",
+  "runsOn": "Raspberry Pi",
+  "authority": "Engine owns its data (ADR-005); Atlas never writes hq.db.",
+  "domains": [
+    {
+      "id": "brain",
+      "name": "Cortex",
+      "summary": "Atlas's reasoning core: reason together, capture and sort thoughts, intake, voice."
+    },
+    {
+      "id": "build",
+      "name": "Forge",
+      "summary": "Ideas → Plan → Build: placing ideas, the plan, and the dev loop that builds it."
+    },
+    {
+      "id": "direction",
+      "name": "Direction",
+      "summary": "Goals, plans and priorities; what to do next and why."
+    },
+    {
+      "id": "growth",
+      "name": "Skill tree",
+      "summary": "Capabilities, their state and proof, and how to build the next one."
+    },
+    {
+      "id": "assets",
+      "name": "Assets",
+      "summary": "What you have: resources and the arsenal of everything you built."
+    },
+    {
+      "id": "research",
+      "name": "Research",
+      "summary": "Investigating options with sources, and finding reusable software."
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "summary": "Decisions, attempts and lessons Engine has learned."
+    },
+    {
+      "id": "attention",
+      "name": "Owner attention",
+      "summary": "What only the owner can settle: needs, approvals, terminal steps, work stopped by usage limits."
+    },
+    {
+      "id": "system",
+      "name": "System",
+      "summary": "The engine keeping itself healthy: usage and kill switch, budgets, models, updates, repairs."
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "engine.brain.write_thought",
+      "domain": "brain",
+      "summary": "Write a thought to the brain; the engine sorts it into the plan.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/brain.py",
+      "use": [
+        "hq-dashboard",
+        "telegram",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Notes",
+      "evidence": "tests/test_brain.py",
+      "intent": "brain.write",
+      "requires": [
+        "engine.memory.recall"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.recent_thoughts",
+      "domain": "brain",
+      "summary": "Show recent thoughts and what the brain made of each (sorted, waiting for a model, or kept as a note).",
+      "effect": "read",
+      "status": "live",
+      "evidence": "tests/test_brain.py",
+      "source": "engine/brain.py",
+      "use": [
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Notes",
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.brain_dump",
+      "domain": "brain",
+      "summary": "Turn free text, typed or spoken, into structured additions to the plan.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/dump.py",
+      "use": [
+        "hq-dashboard",
+        "telegram",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Notes",
+      "evidence": "tests/test_flow.py",
+      "intent": "brain.dump",
+      "requires": [
+        "engine.brain.write_thought"
+      ],
+      "note": "In Atlas through Talk (engine.brain.talk): statements are sorted by this function."
+    },
+    {
+      "id": "engine.brain.sort_thoughts",
+      "domain": "brain",
+      "summary": "Sort waiting thoughts into ideas, tasks or memories, hourly or on demand.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/brain.py",
+      "use": [
+        "automatic",
+        "cli"
+      ],
+      "atlasSection": "Notes",
+      "evidence": "tests/test_brain.py",
+      "requires": [
+        "engine.brain.write_thought"
+      ]
+    },
+    {
+      "id": "engine.brain.route_thought",
+      "domain": "brain",
+      "summary": "Decide where a thought belongs: the task-versus-idea rule and the place in the plan.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/flow.py",
+      "use": [
+        "cli",
+        "automatic"
+      ],
+      "atlasSection": "Notes",
+      "evidence": "tests/test_flow.py"
+    },
+    {
+      "id": "engine.brain.review_suggestions",
+      "domain": "brain",
+      "summary": "Accept or dismiss what the brain suggests.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/brain.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Notes",
+      "evidence": "tests/test_brain.py",
+      "requires": [
+        "engine.build.do_over"
+      ],
+      "note": "In Atlas folded into the do-over: open drop/merge suggestions count as drift, and the diff waits on Today."
+    },
+    {
+      "id": "engine.brain.undo_changes",
+      "domain": "brain",
+      "summary": "Undo plan changes from the change log, including the 7-second Undo after an action.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/brain.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Memory",
+      "evidence": "tests/test_dashboard_optimistic_runtime.py",
+      "intent": "plan.undo",
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.ingest",
+      "domain": "brain",
+      "summary": "Take in a link, image or PDF and file it as memory.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/intake/__init__.py",
+      "use": [
+        "hq-dashboard",
+        "telegram",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Notes",
+      "evidence": "tests/test_intake.py",
+      "intent": "brain.ingest",
+      "requires": [
+        "engine.brain.write_thought"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.read_pdf",
+      "domain": "brain",
+      "summary": "Read PDFs: text first, a picture of the first page for scans.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/intake/pdf.py",
+      "use": [
+        "automatic"
+      ],
+      "atlasSection": "Notes",
+      "evidence": "tests/test_intake_pdf.py",
+      "requires": [
+        "engine.brain.ingest"
+      ]
+    },
+    {
+      "id": "engine.brain.voice_input",
+      "domain": "brain",
+      "summary": "Speak a thought and see the transcript live; edit it, then ask Cortex or file it (GPU PC, Pi or cloud Whisper, or browser speech).",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/models.py",
+      "use": [
+        "hq-dashboard",
+        "telegram",
+        "atlas"
+      ],
+      "atlasSection": "Cortex",
+      "evidence": "tests/test_voice.py",
+      "intent": "brain.voice",
+      "requires": [
+        "engine.brain.brain_dump"
+      ],
+      "note": "One voice path (task #143): in Atlas, Quick note 🎙 shows the transcript live (browser speech, or Whisper on the GPU PC, Pi or cloud), editable before it is sent to Cortex or filed; Telegram voice messages use the same Whisper tiers, set up under Systems.",
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.voice_backlog",
+      "domain": "brain",
+      "summary": "Retry recordings that could not be transcribed when they arrived.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/voiceback.py",
+      "use": [
+        "automatic",
+        "cli"
+      ],
+      "atlasSection": "Notes",
+      "evidence": "tests/test_voiceback.py",
+      "requires": [
+        "engine.brain.voice_input"
+      ]
+    },
+    {
+      "id": "engine.brain.talk",
+      "domain": "brain",
+      "summary": "Talk to Atlas as to Claude: a question is answered from your plan (mode ask always answers), anything else is sorted into visions, objectives, goals, tasks, ideas, skill-tree nodes or memories, with what changed and where, and undo. The one chat path, the same in the app and on Telegram.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/talk.py",
+      "use": [
+        "atlas",
+        "telegram",
+        "hq-dashboard",
+        "cli"
+      ],
+      "atlasSection": "Cortex",
+      "evidence": "tests/test_talk.py",
+      "intent": "plan.ask",
+      "requires": [
+        "engine.memory.recall"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.conversation",
+      "domain": "brain",
+      "summary": "The recent conversation with Atlas (your questions and Claude's answers).",
+      "effect": "read",
+      "status": "live",
+      "evidence": "tests/test_today.py",
+      "source": "engine/chat.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Cortex",
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.conversations",
+      "domain": "brain",
+      "summary": "Your conversations with Cortex, newest first, to go back to an earlier one.",
+      "effect": "read",
+      "status": "live",
+      "evidence": "tests/test_hub.py",
+      "source": "engine/chat.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Cortex",
+      "viaHub": true
+    },
+    {
+      "id": "engine.assets.agents",
+      "domain": "assets",
+      "summary": "Coding agents as switchable resources: which are installed, which are out of usage, your fallback order, and a hand-over prompt any agent can start from.",
+      "effect": "read",
+      "status": "live",
+      "evidence": "tests/test_agents.py",
+      "source": "engine/agents.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Systems",
+      "viaHub": true
+    },
+    {
+      "id": "engine.assets.agent_order",
+      "domain": "assets",
+      "summary": "Set the fallback order of coding agents and list the installed ones under Resources.",
+      "effect": "act",
+      "status": "live",
+      "evidence": "tests/test_agents.py",
+      "source": "engine/agents.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Systems",
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.ideas",
+      "domain": "build",
+      "summary": "Idea cards with where each fits in the plan, plus saved research.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/placement.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Ideas",
+      "evidence": "tests/test_placement.py",
+      "intent": "ideas.read",
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.place_ideas",
+      "domain": "build",
+      "summary": "Suggest for every open idea an existing path or a new one, with a reason.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/placement.py",
+      "use": [
+        "hq-dashboard",
+        "automatic",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Ideas",
+      "evidence": "tests/test_placement.py",
+      "requires": [
+        "engine.build.ideas"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.explore_idea",
+      "domain": "build",
+      "summary": "Explore an idea: which visions and goals it serves and how, why it is worth having, how it could start something new, a first step, risks, and whether to take it as a task, a goal or later.",
+      "effect": "propose",
+      "status": "live",
+      "evidence": "tests/test_explore.py",
+      "source": "engine/explore.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Forge › Ideas",
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.idea_to_plan",
+      "domain": "build",
+      "summary": "Take an idea into the plan: the AI decides task or goal from its exploration (or the placement), or you choose the goal yourself.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/placement.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Ideas",
+      "evidence": "tests/test_placement.py",
+      "requires": [
+        "engine.build.place_ideas"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.overlap_check",
+      "domain": "build",
+      "summary": "Before building: does this already exist in the engine, the arsenal or the backlog?",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/overlap.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "automatic",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_overlap.py",
+      "intent": "build.overlap",
+      "requires": [
+        "engine.assets.arsenal_find"
+      ],
+      "note": "In Atlas: the task detail (\"Already in Atlas?\") and holds on Today."
+    },
+    {
+      "id": "engine.build.prerequisites",
+      "domain": "build",
+      "summary": "What has to be there first for a task or node; informs, never blocks.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/prereq.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_prereq.py",
+      "intent": "build.prerequisites",
+      "note": "One home for what must exist first, for a task or a skill-tree node (merged from engine.growth.prerequisites, #128). In Atlas: the task detail, the skill tree (\"Needs first\") and Research (\"Before you start\")."
+    },
+    {
+      "id": "engine.build.plan_tree",
+      "domain": "build",
+      "summary": "The plan as one tree: mission, nested goals by horizon, tasks.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/plan.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_plan.py",
+      "intent": "plan.read",
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.edit_plan",
+      "domain": "build",
+      "summary": "Create and edit tasks, ideas, goals and skill-tree nodes; nest goals.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/edit.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_task_actions.py",
+      "intent": "plan.edit",
+      "requires": [
+        "engine.build.plan_tree"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.task_status",
+      "domain": "build",
+      "summary": "Mark tasks doing, to do, done, dropped or deleted; set the owner.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/cli.py",
+      "use": [
+        "hq-dashboard",
+        "telegram",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_task_actions.py",
+      "intent": "plan.status",
+      "requires": [
+        "engine.build.plan_tree"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.reorder_tasks",
+      "domain": "build",
+      "summary": "Move a task up or down, or back to automatic ranking.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/edit.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_rerank.py",
+      "requires": [
+        "engine.direction.ranked_next_steps"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.overview",
+      "domain": "build",
+      "summary": "Every task and idea in one list with filters and what blocks what.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/overview.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_overview.py",
+      "intent": "plan.overview",
+      "requires": [
+        "engine.build.plan_tree"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.task_detail",
+      "domain": "build",
+      "summary": "Readable evidence behind a task, with model reasoning kept apart from facts.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/taskdetail.py",
+      "use": [
+        "hq-dashboard",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_overlap.py",
+      "requires": [
+        "engine.build.plan_tree"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.do_over",
+      "domain": "build",
+      "summary": "Claude re-evaluates the whole open plan (keep, change, done, drop, merge, new), automatically after real change and daily, or on request; applied only after approval, undoable.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/doover.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_doover.py",
+      "intent": "plan.redo",
+      "requires": [
+        "engine.build.plan_tree",
+        "engine.direction.ranked_next_steps"
+      ],
+      "note": "One home for re-evaluating the plan (merged from engine.brain.reevaluate_plan, #124): the brain's re-prioritisation runs first, then a do-over is drafted when the plan drifted. Also hq brain think, hq doover replan and Telegram /think.",
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.do_over_changes",
+      "domain": "build",
+      "summary": "A plan re-evaluation in short: what changes mainly and why, the counts, and the changed tasks with their reasons.",
+      "effect": "read",
+      "status": "live",
+      "evidence": "tests/test_doover.py",
+      "source": "engine/doover.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Today",
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.propose_build",
+      "domain": "build",
+      "summary": "Turn an idea into a build proposal for the dev loop, shown before submission.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/devloop.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Build",
+      "evidence": "tests/test_devloop.py",
+      "intent": "build.propose",
+      "requires": [
+        "engine.direction.ranked_next_steps"
+      ],
+      "note": "In Atlas: Forge › Build (engine.build.quick_build)."
+    },
+    {
+      "id": "engine.build.quick_build",
+      "domain": "build",
+      "summary": "An explicit build request goes straight to the dev loop.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/quickbuild.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Build",
+      "evidence": "tests/test_quickbuild.py",
+      "intent": "build.now",
+      "requires": [
+        "engine.build.propose_build"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.dev_loop",
+      "domain": "build",
+      "summary": "Claude Code on the Pi builds AI tasks one per run on a branch and opens a pull request.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/devloop.py",
+      "use": [
+        "automatic",
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Build",
+      "evidence": "tests/test_devloop.py",
+      "intent": "code.build",
+      "requires": [
+        "engine.build.propose_build",
+        "engine.system.usage"
+      ],
+      "note": "Runs only when enabled on the Pi (deploy/enable-devloop.sh) and within your limits.",
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.dev_controls",
+      "domain": "build",
+      "summary": "Pause, resume, stop, autonomy level, batch size and daily limits of the dev loop.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/devloop.py",
+      "use": [
+        "hq-dashboard",
+        "telegram",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Build",
+      "evidence": "tests/test_devloop.py",
+      "intent": "build.control",
+      "requires": [
+        "engine.build.dev_loop"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.run_status",
+      "domain": "build",
+      "summary": "Live lanes and step-by-step console for every task in flight: each step one plain sentence (engine/buildsteps.py, #179), raw output behind Output.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/devloop.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Build",
+      "evidence": "tests/test_dashboard_lanes_runtime.py",
+      "intent": "build.status",
+      "requires": [
+        "engine.build.propose_build"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.build_queue",
+      "domain": "build",
+      "summary": "Your queue first, then the engine's proposals; queue drafts or move to the top.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/skilltree.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Build",
+      "evidence": "tests/test_skilltree.py",
+      "requires": [
+        "engine.build.dev_loop"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.build_approval",
+      "domain": "build",
+      "summary": "Approve or refuse big or outside-code builds before they start.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/skilltree.py",
+      "use": [
+        "hq-dashboard",
+        "telegram",
+        "atlas"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_skilltree.py",
+      "requires": [
+        "engine.build.build_queue"
+      ],
+      "note": "In Atlas through Today › Waiting on you (engine.attention.answer_needs)."
+    },
+    {
+      "id": "engine.build.checkpoints",
+      "domain": "build",
+      "summary": "Save a task's progress before a usage, turn, time or context limit.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/checkpoint.py",
+      "use": [
+        "automatic"
+      ],
+      "atlasSection": "Automatic",
+      "evidence": "tests/test_checkpoint.py",
+      "intent": "work.checkpoint",
+      "requires": [
+        "engine.build.dev_loop"
+      ]
+    },
+    {
+      "id": "engine.build.model_routing",
+      "domain": "build",
+      "summary": "Pick a light, standard or strong model per task, with the reason logged.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/routing.py",
+      "use": [
+        "automatic",
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Automatic",
+      "evidence": "tests/test_routing.py",
+      "requires": [
+        "engine.build.dev_loop"
+      ],
+      "note": "In Atlas: the model and its reason show on each run in Forge › Build."
+    },
+    {
+      "id": "engine.build.pr_conflicts",
+      "domain": "build",
+      "summary": "Scan open pull requests for conflicts with main and resolve them.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/devloop.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Build",
+      "evidence": "tests/test_devloop.py",
+      "requires": [
+        "engine.build.dev_loop"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.delivery_evidence",
+      "domain": "build",
+      "summary": "Pull requests from draft to merged to installed; tasks close only on evidence.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/delivery.py",
+      "use": [
+        "automatic",
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Build",
+      "evidence": "tests/test_delivery.py",
+      "intent": "build.evidence",
+      "requires": [
+        "engine.build.run_status"
+      ],
+      "note": "In Atlas: Forge › Build and the update panel (engine.build.run_status)."
+    },
+    {
+      "id": "engine.build.claude_login",
+      "domain": "build",
+      "summary": "Reconnect the Claude subscription on the Pi through the official command-line tool.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/claudeauth.py",
+      "use": [
+        "hq-dashboard",
+        "atlas"
+      ],
+      "atlasSection": "Systems",
+      "evidence": "tests/test_claudeauth.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.isolated_builds",
+      "domain": "build",
+      "summary": "Each build works on its own snapshot of the database, never on live memory.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/devloop.py",
+      "use": [
+        "automatic"
+      ],
+      "atlasSection": "Automatic",
+      "evidence": "tests/test_build_isolation.py",
+      "requires": [
+        "engine.build.dev_loop"
+      ]
+    },
+    {
+      "id": "engine.direction.current_focus",
+      "domain": "direction",
+      "summary": "Current focus, next step and destination.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/skilltree.py",
+      "use": [
+        "atlas",
+        "cli",
+        "hq-dashboard"
+      ],
+      "atlasSection": "Focus",
+      "evidence": "tests/test_direction.py",
+      "intent": "direction.focus",
+      "requires": [
+        "engine.direction.ranked_next_steps"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.direction.directions",
+      "domain": "direction",
+      "summary": "Lifetime visions with their year objectives on a timeline, progress and momentum, and a recommended focus that explains itself.",
+      "effect": "read",
+      "status": "live",
+      "evidence": "tests/test_compass.py",
+      "source": "engine/compass.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Focus",
+      "viaHub": true
+    },
+    {
+      "id": "engine.direction.choose_direction",
+      "domain": "direction",
+      "summary": "Choose the vision to focus on; the ranking gives its work a bonus, so the Forge follows.",
+      "effect": "act",
+      "status": "live",
+      "evidence": "tests/test_compass.py",
+      "source": "engine/compass.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Focus",
+      "viaHub": true,
+      "requires": [
+        "engine.direction.ranked_next_steps"
+      ]
+    },
+    {
+      "id": "engine.direction.shape_directions",
+      "domain": "direction",
+      "summary": "Create visions and year objectives, and place goals under a vision (undoable).",
+      "effect": "act",
+      "status": "live",
+      "evidence": "tests/test_compass.py",
+      "source": "engine/compass.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Focus",
+      "viaHub": true
+    },
+    {
+      "id": "engine.direction.set_focus",
+      "domain": "direction",
+      "summary": "Choose the build mode: plan first, balanced, ideas first or management agent first.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/skilltree.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_skilltree.py",
+      "requires": [
+        "engine.direction.current_focus"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.direction.ranked_next_steps",
+      "domain": "direction",
+      "summary": "One ranked list of what to do next, re-ranked when something changes.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/priority.py",
+      "use": [
+        "atlas",
+        "automatic",
+        "cli",
+        "hq-dashboard",
+        "telegram"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_rerank.py",
+      "intent": "direction.next-steps",
+      "requires": [
+        "engine.memory.recall"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.direction.explain_rank",
+      "domain": "direction",
+      "summary": "Why a task ranks where it does, and the full build explanation (problem, why now, expected result, goal, dependencies, effort, uncertainty, success criterion; missing reasoning shown as missing).",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/priority.py",
+      "use": [
+        "cli",
+        "telegram",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_rerank.py",
+      "requires": [
+        "engine.direction.ranked_next_steps"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.direction.zoom_out",
+      "domain": "direction",
+      "summary": "The queue rolled up into skill-tree nodes and goals: what it all builds towards.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/direction.py",
+      "use": [
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Forge › Plan",
+      "evidence": "tests/test_direction.py",
+      "intent": "direction.rollup",
+      "requires": [
+        "engine.growth.skill_tree"
+      ],
+      "note": "Data built; its view awaits your design choice (docs/design/ZOOM_OUT.md).",
+      "viaHub": true
+    },
+    {
+      "id": "engine.direction.brief",
+      "domain": "direction",
+      "summary": "The daily brief: what changed, what is next, what needs you.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/loop.py",
+      "use": [
+        "hq-dashboard",
+        "telegram",
+        "cli",
+        "automatic",
+        "atlas"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_today.py",
+      "intent": "direction.brief",
+      "requires": [
+        "engine.direction.ranked_next_steps"
+      ],
+      "note": "In Atlas: Today at a glance (engine.direction.progress and next steps)."
+    },
+    {
+      "id": "engine.direction.cycle",
+      "domain": "direction",
+      "summary": "The engine's loop: observe, re-evaluate, re-rank, log, brief.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/loop.py",
+      "use": [
+        "automatic",
+        "cli"
+      ],
+      "atlasSection": "Automatic",
+      "evidence": "tests/test_brain.py",
+      "requires": [
+        "engine.direction.ranked_next_steps"
+      ]
+    },
+    {
+      "id": "engine.direction.progress",
+      "domain": "direction",
+      "summary": "Streaks, completed work and how the plan is moving.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/progress.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_progress.py",
+      "intent": "direction.progress",
+      "viaHub": true
+    },
+    {
+      "id": "engine.direction.weekly_review",
+      "domain": "direction",
+      "summary": "Write the week's review: what was done, goals, what slipped, focus for next week, with a short observation by Claude when reachable; saved to memory.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/progress.py",
+      "use": [
+        "hq-dashboard",
+        "telegram",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_review_batch.py",
+      "intent": "direction.review",
+      "requires": [
+        "engine.direction.progress"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.growth.skill_tree",
+      "domain": "growth",
+      "summary": "Capabilities with state (unlocked, building, available, locked) and build order.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/skilltree.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Map › Skill tree",
+      "evidence": "tests/test_dashboard_tree_runtime.py",
+      "intent": "skills.tree",
+      "requires": [
+        "engine.build.plan_tree"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.growth.sandbox_runs",
+      "domain": "growth",
+      "summary": "Outside code tested in a Docker sandbox without network or credentials: result, scan flags and output, plus the security gate (source, trust, licence), as evidence for the manual approval.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/sandbox.py",
+      "use": [
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Map › Skill tree",
+      "evidence": "tests/test_sandbox.py",
+      "intent": "skills.sandbox",
+      "note": "Runs start from the CLI (hq sandbox run / check); a screen section is a follow-up.",
+      "viaHub": true
+    },
+    {
+      "id": "engine.growth.skill_proof",
+      "domain": "growth",
+      "summary": "How sure the engine is that a skill is held: confirmed, partly shown, suggested or not yet.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/skilltree.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Map › Skill tree",
+      "evidence": "tests/test_skilltree.py",
+      "intent": "skills.proof",
+      "requires": [
+        "engine.build.delivery_evidence"
+      ]
+    },
+    {
+      "id": "engine.growth.confirm_proof",
+      "domain": "growth",
+      "summary": "Confirm or dismiss suggested proof for a skill.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/skilltree.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Map › Skill tree",
+      "evidence": "tests/test_skilltree.py",
+      "requires": [
+        "engine.growth.skill_proof"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.growth.node_research",
+      "domain": "growth",
+      "summary": "Research how to build a node: outside tools, your arsenal or build it; pick one to draft a task.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/research.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Map › Skill tree",
+      "evidence": "tests/test_research.py",
+      "intent": "skills.research",
+      "requires": [
+        "engine.growth.skill_tree",
+        "engine.assets.arsenal_find"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.growth.auto_link",
+      "domain": "growth",
+      "summary": "Link open tasks to the skill-tree node they build, with undo.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/autolink.py",
+      "use": [
+        "automatic",
+        "cli"
+      ],
+      "atlasSection": "Map › Skill tree",
+      "evidence": "tests/test_autolink.py",
+      "requires": [
+        "engine.growth.skill_tree"
+      ]
+    },
+    {
+      "id": "engine.growth.draft_node_task",
+      "domain": "growth",
+      "summary": "Draft the task that builds a node, for you to queue.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/skilltree.py",
+      "use": [
+        "hq-dashboard",
+        "atlas"
+      ],
+      "atlasSection": "Map › Skill tree",
+      "evidence": "tests/test_skilltree.py",
+      "requires": [
+        "engine.growth.skill_tree"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.assets.arsenal_find",
+      "domain": "assets",
+      "summary": "Search everything you have built, for reuse.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/arsenal.py",
+      "use": [
+        "cli",
+        "automatic",
+        "atlas"
+      ],
+      "atlasSection": "Resources",
+      "evidence": "tests/test_hq.py",
+      "intent": "software.find-reusable",
+      "viaHub": true
+    },
+    {
+      "id": "engine.assets.arsenal_scan",
+      "domain": "assets",
+      "summary": "Index your project folders again into the arsenal; adding a new folder stays on the command line.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/arsenal.py",
+      "use": [
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Resources",
+      "evidence": "tests/test_hq.py",
+      "requires": [
+        "engine.assets.arsenal_find"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.assets.resources",
+      "domain": "assets",
+      "summary": "Your resources: money, hardware, accounts, time, skills, contacts, services.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/cli.py",
+      "use": [
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Resources",
+      "evidence": "tests/test_hq.py",
+      "intent": "resources.read",
+      "viaHub": true
+    },
+    {
+      "id": "engine.assets.edit_resource",
+      "domain": "assets",
+      "summary": "Add, correct or retire a resource; undoable, nothing is deleted, never secrets.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/resources.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Resources",
+      "evidence": "tests/test_hub.py",
+      "requires": [
+        "engine.assets.resources"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.build_order",
+      "domain": "build",
+      "summary": "Drag the builder's queue into your own order; what you place there is built first, in that order.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/skilltree.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Forge › Build",
+      "evidence": "tests/test_hub.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.assets.report_hardware",
+      "domain": "assets",
+      "summary": "A machine (the Pi itself, or Atlas on the PC through the hub) reports its CPU, memory, GPUs and disk as one live resource.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/hardware.py",
+      "use": [
+        "atlas",
+        "automatic"
+      ],
+      "atlasSection": "Resources",
+      "evidence": "tests/test_hardware.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.research.radar_scan",
+      "domain": "research",
+      "summary": "Scan GitHub, Hacker News, arXiv, Hugging Face, lab blogs and followed releases, ranked against your interests.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/radar.py",
+      "use": [
+        "automatic",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Research",
+      "evidence": "tests/test_hq.py",
+      "intent": "research.scan",
+      "viaHub": true,
+      "note": "Runs by itself every few hours; Scan now under Research › Sources & limits."
+    },
+    {
+      "id": "engine.research.research_feed",
+      "domain": "research",
+      "summary": "Developments and tools that touch Atlas or your interests, with why they matter and what a tool needs first.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/radar.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Research",
+      "evidence": "tests/test_research_desk.py",
+      "intent": "research.feed",
+      "requires": [
+        "engine.research.radar_scan"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.research.mark_finding",
+      "domain": "research",
+      "summary": "Save a finding for later, hide it, or bring it back.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/radar.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Research",
+      "evidence": "tests/test_hub.py",
+      "requires": [
+        "engine.research.research_feed"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.research.tune_interests",
+      "domain": "research",
+      "summary": "Review which interests produced useful hits and which noise after the first scans; mute, boost or add interests used for ranking.",
+      "effect": "act",
+      "status": "built",
+      "source": "engine/radar.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Research",
+      "evidence": "tests/test_radar_tuning.py",
+      "requires": [
+        "engine.research.radar_scan"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.research.research_sources",
+      "domain": "research",
+      "summary": "Choose feeds and per-source limits.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/radar.py",
+      "use": [
+        "hq-dashboard",
+        "atlas"
+      ],
+      "atlasSection": "Research",
+      "evidence": "tests/test_research_desk.py",
+      "requires": [
+        "engine.research.radar_scan"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.research.find_options",
+      "domain": "research",
+      "summary": "Deep research: one question answered for what you build, with sources.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/deepresearch.py",
+      "use": [
+        "hq-dashboard",
+        "telegram",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Research",
+      "evidence": "tests/test_research_desk.py",
+      "intent": "web.research",
+      "note": "One model call; can cost time and money.",
+      "viaHub": true
+    },
+    {
+      "id": "engine.research.sourced_summary",
+      "domain": "research",
+      "summary": "Read the sourced answer of a finished investigation.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/deepresearch.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Research",
+      "evidence": "tests/test_research_desk.py",
+      "intent": "research.read",
+      "requires": [
+        "engine.research.find_options"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.research.research_to_idea",
+      "domain": "research",
+      "summary": "Turn a research item or answer into a named idea.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/deepresearch.py",
+      "use": [
+        "hq-dashboard",
+        "atlas"
+      ],
+      "atlasSection": "Research",
+      "evidence": "tests/test_research_desk.py",
+      "requires": [
+        "engine.research.sourced_summary"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.research.tools_radar",
+      "domain": "research",
+      "summary": "Watch for GitHub tools and skills to try in a sandbox.",
+      "effect": "read",
+      "status": "planned",
+      "source": "engine/radar.py",
+      "use": [
+        "automatic"
+      ],
+      "atlasSection": "Research",
+      "requires": [
+        "engine.research.radar_scan"
+      ],
+      "note": "Phase 3 in Engine's roadmap."
+    },
+    {
+      "id": "engine.memory.recall",
+      "domain": "memory",
+      "summary": "Recall decisions, lessons, preferences and facts relevant to a topic.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/db.py",
+      "use": [
+        "atlas",
+        "automatic",
+        "cli"
+      ],
+      "atlasSection": "Memory",
+      "evidence": "tests/test_memory_recall.py",
+      "intent": "memory.recall",
+      "viaHub": true
+    },
+    {
+      "id": "engine.memory.memories",
+      "domain": "memory",
+      "summary": "Browse the Engine's memory by kind and words: lessons, decisions, preferences, facts, research notices.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/db.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Memory",
+      "evidence": "tests/test_hub.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.memory.record_lesson",
+      "domain": "memory",
+      "summary": "Record a lesson, decision, preference or fact; Cortex also files them from your thoughts.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/db.py",
+      "use": [
+        "cli",
+        "automatic",
+        "atlas"
+      ],
+      "atlasSection": "Memory",
+      "evidence": "tests/test_memory_recall.py",
+      "intent": "memory.record",
+      "requires": [
+        "engine.memory.recall"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.memory.think",
+      "domain": "memory",
+      "summary": "Claude reads the engine's memory and proposes what should change.",
+      "effect": "propose",
+      "status": "built",
+      "source": "engine/agent.py",
+      "use": [
+        "cli"
+      ],
+      "atlasSection": "Automatic",
+      "intent": "memory.think",
+      "requires": [
+        "engine.memory.recall"
+      ],
+      "note": "Built, switched off until Phase 2."
+    },
+    {
+      "id": "engine.memory.change_log",
+      "domain": "memory",
+      "summary": "Every change with who made it and why; the basis for undo.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/brain.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Memory",
+      "evidence": "tests/test_brain.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.attention.needs",
+      "domain": "attention",
+      "summary": "What only you can settle: decisions, approvals and your own tasks an agent waits for; answer in place.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/needs.py",
+      "use": [
+        "atlas",
+        "cli",
+        "hq-dashboard",
+        "telegram"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_needs.py",
+      "intent": "attention.read",
+      "viaHub": true
+    },
+    {
+      "id": "engine.attention.answer_needs",
+      "domain": "attention",
+      "summary": "Answer a need by tap, typing or voice.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/needs.py",
+      "use": [
+        "atlas",
+        "cli",
+        "hq-dashboard",
+        "telegram"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_dashboard_needs_runtime.py",
+      "requires": [
+        "engine.attention.needs"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.attention.approvals",
+      "domain": "attention",
+      "summary": "Approve or deny requests: spending, access, sending, publishing, installing.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/gatekeeper.py",
+      "use": [
+        "hq-dashboard",
+        "telegram",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_hq.py",
+      "intent": "attention.approve",
+      "requires": [
+        "engine.attention.needs"
+      ],
+      "note": "In Atlas through Today › Waiting on you (engine.attention.answer_needs)."
+    },
+    {
+      "id": "engine.attention.agent_gatekeeper",
+      "domain": "attention",
+      "summary": "Decide routine agent actions automatically; ask you only for decisions.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/gatekeeper.py",
+      "use": [
+        "automatic"
+      ],
+      "atlasSection": "Automatic",
+      "evidence": "tests/test_research.py",
+      "requires": [
+        "engine.attention.approvals"
+      ]
+    },
+    {
+      "id": "engine.attention.terminal_steps",
+      "domain": "attention",
+      "summary": "Steps an agent left for you to run, with the command and the reason.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/commands.py",
+      "use": [
+        "atlas",
+        "cli",
+        "hq-dashboard",
+        "telegram"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_commands.py",
+      "intent": "attention.terminal",
+      "viaHub": true
+    },
+    {
+      "id": "engine.attention.finish_terminal_step",
+      "domain": "attention",
+      "summary": "Mark a terminal step as done or no longer needed.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/commands.py",
+      "use": [
+        "atlas",
+        "cli",
+        "hq-dashboard",
+        "telegram"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_commands.py",
+      "requires": [
+        "engine.attention.terminal_steps"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.attention.interrupted_work",
+      "domain": "attention",
+      "summary": "Work Claude Code, Codex or the dev loop could not finish because of a usage limit, with a resume prompt.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/resume.py",
+      "use": [
+        "atlas",
+        "automatic",
+        "cli",
+        "hq-dashboard"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_resume.py",
+      "intent": "work.interrupted",
+      "requires": [
+        "engine.build.run_status"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.attention.finish_interrupted",
+      "domain": "attention",
+      "summary": "Mark work stopped by a usage limit as finished or not needed.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/resume.py",
+      "use": [
+        "atlas",
+        "cli",
+        "hq-dashboard"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_resume.py",
+      "requires": [
+        "engine.attention.interrupted_work"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.attention.already_done",
+      "domain": "attention",
+      "summary": "'Already done?' suggestions when merged work mentions a task.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/delivery.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_delivery.py",
+      "requires": [
+        "engine.build.delivery_evidence"
+      ],
+      "note": "In Atlas through Today › Waiting on you (engine.attention.answer_needs)."
+    },
+    {
+      "id": "engine.system.usage",
+      "domain": "system",
+      "summary": "Token use, cost and budgets per job.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/usage.py",
+      "use": [
+        "atlas",
+        "cli",
+        "hq-dashboard"
+      ],
+      "atlasSection": "Systems",
+      "evidence": "tests/test_budget.py",
+      "intent": "system.usage",
+      "viaHub": true
+    },
+    {
+      "id": "engine.system.health",
+      "domain": "system",
+      "summary": "Systems at a glance: kill switch, budgets per job, model routing, automatic repairs, the self-maintenance jobs with their last run, voice and Claude sign-in, and the constitution (read-only).",
+      "effect": "read",
+      "status": "live",
+      "source": "services/atlas/hub.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Systems",
+      "evidence": "tests/test_hub.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.system.voice_setup",
+      "domain": "system",
+      "summary": "Test each way of transcribing voice (GPU PC, Pi, cloud) and set the GPU PC's address; keys stay in the Pi's .env.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/voicesetup.py",
+      "use": [
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Systems",
+      "evidence": "tests/test_hub.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.system.kill_switch",
+      "domain": "system",
+      "summary": "Stop all agent work at once, and resume.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/usage.py",
+      "use": [
+        "hq-dashboard",
+        "telegram",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Systems",
+      "evidence": "tests/test_devloop.py",
+      "intent": "system.stop",
+      "requires": [
+        "engine.system.usage"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.system.budgets",
+      "domain": "system",
+      "summary": "Daily limits on paid model use per background job; falls back to rules or local models.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/budget.py",
+      "use": [
+        "automatic",
+        "hq-dashboard",
+        "atlas"
+      ],
+      "atlasSection": "Systems",
+      "evidence": "tests/test_budget.py",
+      "requires": [
+        "engine.system.usage"
+      ]
+    },
+    {
+      "id": "engine.system.model_router",
+      "domain": "system",
+      "summary": "Send each job to the cheapest model that does it well: GPU PC, Pi or cloud.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/models.py",
+      "use": [
+        "automatic",
+        "atlas"
+      ],
+      "atlasSection": "Systems",
+      "evidence": "tests/test_brain.py"
+    },
+    {
+      "id": "engine.system.updates",
+      "domain": "system",
+      "summary": "Install merged work from GitHub after its tests pass on the Pi, then restart.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/updater.py",
+      "use": [
+        "automatic",
+        "hq-dashboard",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Header",
+      "evidence": "tests/test_updater.py",
+      "intent": "system.update",
+      "viaHub": true
+    },
+    {
+      "id": "engine.system.update_status",
+      "domain": "system",
+      "summary": "Which version the Pi runs, how many changes wait on GitHub, and how the last update went.",
+      "effect": "read",
+      "status": "live",
+      "evidence": "tests/test_updater.py",
+      "source": "engine/updater.py",
+      "use": [
+        "hq-dashboard",
+        "atlas"
+      ],
+      "atlasSection": "Header",
+      "viaHub": true
+    },
+    {
+      "id": "engine.system.repairs",
+      "domain": "system",
+      "summary": "Watchdog: deduplicate crashes, build fixes, test and install small repairs. Switched on or off under Systems.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/recovery.py",
+      "use": [
+        "automatic",
+        "hq-dashboard",
+        "atlas"
+      ],
+      "atlasSection": "Systems",
+      "evidence": "tests/test_recovery.py",
+      "requires": [
+        "engine.system.updates"
+      ],
+      "viaHub": true
+    },
+    {
+      "id": "engine.system.revisit",
+      "domain": "system",
+      "summary": "Monthly review of features built earlier (keep, improve, merge, remove) and of where every function lives (move, merge, remove); proposals become draft tasks. Also after every change to the structure.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/revisit.py",
+      "use": [
+        "automatic",
+        "cli",
+        "atlas"
+      ],
+      "atlasSection": "Automatic",
+      "evidence": "tests/test_revisit.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.system.revalidate",
+      "domain": "system",
+      "summary": "Weekly recheck of the outside tools and models the engine uses.",
+      "effect": "propose",
+      "status": "live",
+      "source": "engine/revalidate.py",
+      "use": [
+        "automatic",
+        "cli"
+      ],
+      "atlasSection": "Automatic",
+      "evidence": "tests/test_revalidate.py"
+    },
+    {
+      "id": "engine.system.schedules",
+      "domain": "system",
+      "summary": "The engine's timed jobs on the Pi.",
+      "effect": "act",
+      "status": "live",
+      "source": "deploy/schedules.sh",
+      "use": [
+        "automatic"
+      ],
+      "atlasSection": "Automatic",
+      "evidence": "tests/test_schedules.py"
+    },
+    {
+      "id": "engine.system.telegram_bot",
+      "domain": "system",
+      "summary": "Brief, approvals, thoughts and questions from your phone.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/interfaces/telegram.py",
+      "use": [
+        "telegram"
+      ],
+      "atlasSection": "Systems",
+      "evidence": "tests/test_telegram.py",
+      "intent": "channel.phone"
+    },
+    {
+      "id": "engine.system.dashboard_access",
+      "domain": "system",
+      "summary": "The engine's own dashboard over Tailscale with an access token.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/dashboard.py",
+      "use": [
+        "hq-dashboard"
+      ],
+      "atlasSection": "Systems",
+      "evidence": "tests/test_dashboard_port.py"
+    },
+    {
+      "id": "engine.system.snapshot_export",
+      "domain": "system",
+      "summary": "Export the plan (goals, tasks, skill-tree nodes, ideas, resources, runs, research) as one read-only snapshot for Atlas's read model.",
+      "effect": "read",
+      "status": "tested",
+      "source": "engine/export.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Systems",
+      "evidence": "tests/test_engine_export.py",
+      "viaHub": true,
+      "note": "RA-009: works on an in-memory copy (no rescore, no planning cycle); missing columns answer 409 schema_mismatch. Evidence STATE/evidence/RA-009.md."
+    },
+    {
+      "id": "engine.system.private_backup",
+      "domain": "system",
+      "summary": "Daily encrypted snapshot of the owner's data to a separate private repository; the public repository never holds data. Shown under Systems › Self-maintenance.",
+      "effect": "act",
+      "status": "built",
+      "source": "engine/backup.py",
+      "use": [
+        "automatic",
+        "cli"
+      ],
+      "atlasSection": "Automatic",
+      "evidence": "tests/test_backup.py"
+    },
+    {
+      "id": "engine.brain.cortex",
+      "domain": "brain",
+      "summary": "The name of Atlas's reasoning core: Cortex, or the nickname the owner gave it.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/chat.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Cortex",
+      "evidence": "tests/test_hub.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.name_cortex",
+      "domain": "brain",
+      "summary": "Give Cortex a nickname (shown everywhere in Atlas; the reasoning core answers to it).",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/chat.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Cortex",
+      "evidence": "tests/test_hub.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.speak_to",
+      "domain": "brain",
+      "summary": "Speak to Cortex from any screen: it reads what is shown and proposes up to three numbered actions; nothing runs until the owner says yes.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/screen.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Cortex",
+      "evidence": "tests/test_screen.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.chat_stream",
+      "domain": "brain",
+      "summary": "One turn of the Cortex chat on Claude Code: streamed answer, real conversation turns, web search, Atlas look-ups, attached files; changes only as numbered proposals.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/cortex.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Cortex",
+      "evidence": "tests/test_cortex.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.chat_file",
+      "domain": "brain",
+      "summary": "Attach a file to the current Cortex conversation so Cortex can read it.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/cortex.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Cortex",
+      "evidence": "tests/test_cortex.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.build_next",
+      "domain": "build",
+      "summary": "The Build next lane: put a task at a place (1 = next), reorder or take it out; the builder takes these first, before the queue and any score. Undoable.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/skilltree.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Forge › Build",
+      "evidence": "tests/test_build_next.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.parallel",
+      "domain": "build",
+      "summary": "Ready AI tasks with no blockers between them and no files in common, proposed as one batch to build side by side, with why the others are left out.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/parallel.py",
+      "use": [
+        "atlas",
+        "cli"
+      ],
+      "atlasSection": "Forge › Build",
+      "evidence": "tests/test_parallel.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.build.parallel_batch",
+      "domain": "build",
+      "summary": "Accept the proposed batch of independent tasks (only these may fill the builder's extra slots) or dismiss that set. Undoable.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/parallel.py",
+      "use": [
+        "atlas",
+        "cli"
+      ],
+      "atlasSection": "Forge › Build",
+      "evidence": "tests/test_parallel.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.new_conversation",
+      "domain": "brain",
+      "summary": "Start a new conversation with Cortex, or go back to an earlier one; nothing is deleted.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/chat.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Cortex",
+      "evidence": "tests/test_hub.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.mockups",
+      "domain": "brain",
+      "summary": "Visual first: tasks with a visual side waiting for the choice 'mockup first or build without', and every mockup with its rounds.",
+      "effect": "read",
+      "status": "live",
+      "source": "engine/mockup.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Cortex",
+      "evidence": "tests/test_mockup.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.mockup",
+      "domain": "brain",
+      "summary": "Start a mockup of a UI feature, add rounds made in Claude or ChatGPT (picture or HTML), and hold the build until the owner approves it.",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/mockup.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Cortex",
+      "evidence": "tests/test_mockup.py",
+      "intent": "design.mockup",
+      "viaHub": true
+    },
+    {
+      "id": "engine.direction.fresh_window",
+      "domain": "direction",
+      "summary": "How long newly added tasks, ideas and goals stand out as new (Today's Just added, the plan list and the goal tree).",
+      "effect": "act",
+      "status": "live",
+      "source": "engine/fresh.py",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Today",
+      "evidence": "tests/test_fresh.py",
+      "viaHub": true
+    },
+    {
+      "id": "engine.brain.cortex_apply",
+      "domain": "brain",
+      "effect": "act",
+      "status": "live",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Cortex",
+      "evidence": "tests/test_cortex_actions.py",
+      "viaHub": true,
+      "summary": "Apply an option Cortex offered (one action or a bundle of steps, all or nothing, one Undo); the other options stay open.",
+      "source": "engine/cortex_actions.py"
+    },
+    {
+      "id": "engine.brain.cortex_autonomy",
+      "domain": "brain",
+      "effect": "act",
+      "status": "live",
+      "use": [
+        "atlas"
+      ],
+      "atlasSection": "Systems",
+      "evidence": "tests/test_cortex_actions.py",
+      "viaHub": true,
+      "summary": "What Cortex may do at once: routine plan changes with Undo (default), or offer every change first.",
+      "source": "engine/cortex_actions.py"
+    }
+  ],
+  "adapter": "Read-only snapshot adapter (RA-008) connected through the hub's snapshot export (RA-009): engine/export.py → engine.system.snapshot_export → services/atlas/enginesync.py. Writes stay disabled (RA-010).",
+  "parent": "atlas",
+  "callable": false
+}

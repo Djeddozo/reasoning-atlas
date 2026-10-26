@@ -1,0 +1,180 @@
+{
+  "viewport": [
+    1394,
+    855
+  ],
+  "regions": {
+    "topbar": {
+      "expected": [
+        0,
+        0,
+        1394,
+        61
+      ],
+      "actual": [
+        0,
+        0,
+        1394,
+        61
+      ],
+      "delta": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "widthWithin2pct": true,
+      "heightWithin2pct": true
+    },
+    "navigation": {
+      "expected": [
+        0,
+        61,
+        172,
+        794
+      ],
+      "actual": [
+        0,
+        61,
+        172,
+        794
+      ],
+      "delta": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "widthWithin2pct": true,
+      "heightWithin2pct": true
+    },
+    "knowledgeMap": {
+      "expected": [
+        186,
+        72,
+        934,
+        602
+      ],
+      "actual": [
+        186,
+        72,
+        933,
+        602
+      ],
+      "delta": [
+        0,
+        0,
+        -1,
+        0
+      ],
+      "widthWithin2pct": true,
+      "heightWithin2pct": true
+    },
+    "researchRoadmap": {
+      "expected": [
+        186,
+        685,
+        934,
+        162
+      ],
+      "actual": [
+        186,
+        685,
+        933,
+        162
+      ],
+      "delta": [
+        0,
+        0,
+        -1,
+        0
+      ],
+      "widthWithin2pct": true,
+      "heightWithin2pct": true
+    },
+    "focus": {
+      "expected": [
+        1133,
+        72,
+        253,
+        254
+      ],
+      "actual": [
+        1133,
+        72,
+        253,
+        254
+      ],
+      "delta": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "widthWithin2pct": true,
+      "heightWithin2pct": true
+    },
+    "selectedNode": {
+      "expected": [
+        1133,
+        336,
+        253,
+        341
+      ],
+      "actual": [
+        1133,
+        336,
+        253,
+        339
+      ],
+      "delta": [
+        0,
+        0,
+        0,
+        -2
+      ],
+      "widthWithin2pct": true,
+      "heightWithin2pct": true
+    },
+    "quickNote": {
+      "expected": [
+        1133,
+        687,
+        253,
+        162
+      ],
+      "actual": [
+        1133,
+        685,
+        253,
+        162
+      ],
+      "delta": [
+        0,
+        -2,
+        0,
+        0
+      ],
+      "widthWithin2pct": true,
+      "heightWithin2pct": true
+    }
+  },
+  "checks": {
+    "keyboardSelectsNode": true,
+    "slashFocusesSearch": true,
+    "searchFiltersMap": true,
+    "tabOrderStart": [
+      "Skip to workspace",
+      "Search research concepts",
+      "\u2318Map",
+      "\u2301Roadmap"
+    ],
+    "skipLinkFirst": true,
+    "unbuiltLabeled": 7,
+    "unbuiltPlaceholder": true,
+    "progressTasksShown": 24,
+    "offlineBannerShown": true,
+    "1280x800HorizontalOverflowPx": 0,
+    "zoom200HorizontalOverflowPx": 0
+  }
+}

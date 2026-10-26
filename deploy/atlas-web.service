@@ -1,0 +1,16 @@
+[Unit]
+Description=Reasoning Atlas
+After=network-online.target atlas-hub.service
+Wants=network-online.target atlas-hub.service
+
+[Service]
+WorkingDirectory=%h/hq-system
+EnvironmentFile=%h/hq-system/runtime/web.env
+ExecStart=/usr/bin/python3 -m services.atlas.server --port 4310
+Restart=always
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "description": "Things waiting on the owner, added by agents. Shown in the app under 'Waiting on you'. Ticking an item in the app is stored locally and does not change this file. Remove an item here once the owner's answer is recorded.",
+  "reminders": [
+    {
+      "id": "demo-voice",
+      "title": "Choose a voice model for brain dumps",
+      "detail": "Synthetic demo item. Local Whisper on a GPU PC or a cloud model: the Engine keeps working either way.",
+      "link": "RA-058",
+      "group": "Decisions",
+      "createdAt": "2026-10-26T00:00:00Z"
+    },
+    {
+      "id": "demo-dissect-notes",
+      "title": "Dissect the notes app",
+      "detail": "Synthetic demo item. Write down what the app is for, which parts belong together and how it should join Atlas.",
+      "link": "RA-023",
+      "group": "Apps to dissect",
+      "createdAt": "2026-10-26T00:00:00Z"
+    },
+    {
+      "id": "demo-dissect-budget",
+      "title": "Dissect the budget app",
+      "detail": "Synthetic demo item. Same five questions as for the notes app.",
+      "link": "RA-023",
+      "group": "Apps to dissect",
+      "createdAt": "2026-10-26T00:00:00Z"
+    },
+    {
+      "id": "demo-review-shell",
+      "title": "Review the visual shell",
+      "detail": "Synthetic demo item. Open the app, compare it with the reference mockup and tell an agent what to change.",
+      "link": "RA-004",
+      "group": "Reviews",
+      "createdAt": "2026-10-26T00:00:00Z"
+    }
+  ]
+}

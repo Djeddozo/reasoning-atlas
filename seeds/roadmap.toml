@@ -1,0 +1,318 @@
+# Starting roadmap, loaded by `hq init --seed`. Dates assume a start on Sat 10 Oct 2026
+# and roughly 4–6 hours a week alongside school and work. Shift them freely; HQ re-ranks.
+# `after` lists keys of tasks that must be done first.
+
+[[goals]]
+key = "g_hq"
+title = "HQ runs on its own and tells me what to do next"
+horizon = "quarter"
+why = "Foundation for everything else: a system that keeps going while I'm at school."
+
+[[goals]]
+key = "g_voice"
+title = "Run HQ from my phone by voice, no typing"
+horizon = "quarter"
+why = "Speed: the gap between thinking something and HQ acting on it should be seconds."
+
+[[goals]]
+key = "g_grow"
+title = "HQ finds and proposes opportunities and new skills by itself"
+horizon = "year"
+why = "Compounding: every project and skill makes the next one faster."
+
+# ---------------- Phase 0 · Foundation (10–18 Oct) ----------------
+[[tasks]]
+key = "p0_repo"
+title = "Put hq-system in a private GitHub repo"
+phase = 0
+owner = "me"
+impact = 4
+effort_h = 0.5
+due = "2026-10-11"
+goal = "g_hq"
+
+[[tasks]]
+key = "p0_resources"
+title = "Fill the resource map: money, hardware, accounts, time, skills"
+description = "Use `hq add resource`. Be complete: this is what HQ reasons about."
+phase = 0
+owner = "me"
+impact = 5
+effort_h = 1.5
+due = "2026-10-12"
+goal = "g_hq"
+after = ["p0_repo"]
+
+[[tasks]]
+key = "p0_goals"
+title = "Write my own goals for the next 3 months and 1 year"
+phase = 0
+owner = "me"
+impact = 5
+effort_h = 1
+due = "2026-10-12"
+goal = "g_hq"
+
+[[tasks]]
+key = "p0_rules"
+title = "Review and adjust config/constitution.toml"
+phase = 0
+owner = "me"
+impact = 4
+effort_h = 0.5
+due = "2026-10-13"
+goal = "g_hq"
+
+[[tasks]]
+key = "p0_arsenal"
+title = "Register everything I've built in the arsenal (`hq arsenal add <folder>`)"
+description = "Old scripts, the finance program, school projects, Nerds tools. HQ indexes every function for reuse."
+phase = 0
+owner = "me"
+impact = 5
+effort_h = 1
+due = "2026-10-14"
+goal = "g_grow"
+after = ["p0_repo"]
+
+[[tasks]]
+key = "p0_radar"
+title = "Run the first radar scan, open the dashboard (`hq serve`) and tune radar interests"
+phase = 0
+owner = "me"
+impact = 4
+effort_h = 0.5
+due = "2026-10-12"
+goal = "g_grow"
+
+[[tasks]]
+key = "p0_habit"
+title = "Use `hq next` and `hq inbox` daily for one week"
+description = "Proves the priority engine; note what feels wrong and tune weights."
+phase = 0
+owner = "me"
+impact = 4
+effort_h = 1.5
+due = "2026-10-18"
+goal = "g_hq"
+after = ["p0_resources", "p0_goals"]
+
+# ---------------- Phase 1 · Always on (19 Oct – 8 Nov) ----------------
+[[tasks]]
+key = "p1_vps"
+title = "Raspberry Pi as the always-on HQ host"
+description = "Pi runs HQ 24/7 (loop, radar, dashboard, bots) at ~3 W. SSD instead of SD card, nightly DB backup to the NAS. Fall back to a €5 VPS only if the Pi is too weak."
+phase = 1
+owner = "both"
+impact = 5
+effort_h = 3
+due = "2026-10-25"
+goal = "g_hq"
+after = ["p0_habit"]
+
+[[tasks]]
+key = "p1_cron"
+title = "Schedule: `hq cycle` hourly, `hq radar scan` + `hq brief` at 07:00, `hq arsenal scan` weekly"
+phase = 1
+owner = "ai"
+impact = 5
+effort_h = 1
+due = "2026-10-26"
+goal = "g_hq"
+after = ["p1_vps"]
+
+[[tasks]]
+key = "p1_tailscale"
+title = "Tailscale on Pi, GPU PC and phone: private access to the dashboard from anywhere"
+phase = 1
+owner = "me"
+impact = 5
+effort_h = 1
+due = "2026-10-27"
+goal = "g_voice"
+after = ["p1_vps"]
+
+[[tasks]]
+key = "p1_telegram"
+title = "Telegram bot: text intake, daily brief, approve/deny buttons"
+phase = 1
+owner = "ai"
+impact = 5
+effort_h = 4
+due = "2026-11-01"
+goal = "g_voice"
+after = ["p1_vps"]
+
+[[tasks]]
+key = "p1_voice"
+title = "Voice notes in (speech-to-text) and spoken replies out"
+description = "Voice-in is built (hq/interfaces/telegram.py → models.transcribe → hq dump). Remaining: run a Whisper endpoint on the GPU PC (HQ_WHISPER_URL), re-transcribe voice notes stored while it was offline, a cloud speech-to-text fallback (needs an approval: new service), spoken replies out."
+phase = 1
+owner = "ai"
+impact = 5
+effort_h = 4
+due = "2026-11-08"
+goal = "g_voice"
+after = ["p1_telegram"]
+
+# ---------------- Phase 2 · Thinking (9 – 29 Nov) ----------------
+[[tasks]]
+key = "p2_think"
+title = "Enable `hq think`: Claude reads memory and proposes tasks/ideas each cycle"
+phase = 2
+owner = "both"
+impact = 5
+effort_h = 3
+due = "2026-11-15"
+goal = "g_grow"
+after = ["p1_cron"]
+
+[[tasks]]
+key = "p2_gpu"
+title = "GPU PC as HQ's local brain: Ollama + Wake-on-LAN from the Pi"
+description = "Pi wakes the PC for bulk jobs (radar summaries, tagging, transcription, embeddings), then lets it sleep. Set local_model in the constitution to fit the VRAM."
+phase = 2
+owner = "both"
+impact = 4
+effort_h = 3
+due = "2026-11-20"
+goal = "g_grow"
+after = ["p1_tailscale"]
+
+[[tasks]]
+key = "p2_intake"
+title = "Intake pipeline: forwarded links, screenshots and voice become memories that trigger re-ranking"
+description = "Built: links (fetch + summary), screenshots/images (models.see), PDFs (text layer via pdftotext or a stdlib reader; scans: page 1 via models.see), file storage, Telegram + `hq intake`. Remaining: read every page of multi-page scans, re-transcribe stored voice notes, show pending intake in the brief."
+phase = 2
+owner = "ai"
+impact = 5
+effort_h = 4
+due = "2026-11-22"
+goal = "g_grow"
+after = ["p2_think", "p1_voice"]
+
+[[tasks]]
+key = "p2_review"
+title = "Weekly review: HQ summarises progress, lessons, and proposes next week's focus"
+description = "Built: hq/progress.py (stats, streaks, goal progress, weekly review with an optional model note), Progress tab, Telegram /progress and /done, Sunday cron. Remaining: lessons learned from memory, compare against the previous review."
+phase = 2
+owner = "ai"
+impact = 4
+effort_h = 2
+due = "2026-11-29"
+goal = "g_hq"
+after = ["p2_think"]
+
+# ---------------- Phase 3 · Reach (Dec) ----------------
+[[tasks]]
+key = "p3_connect"
+title = "Connect calendar and email read-only so HQ knows my real schedule"
+phase = 3
+owner = "both"
+impact = 4
+effort_h = 3
+due = "2026-12-06"
+goal = "g_hq"
+after = ["p2_intake"]
+
+[[tasks]]
+key = "p3_sandbox"
+title = "Sandbox (Docker, no credentials, no network to my systems) for testing outside code"
+phase = 3
+owner = "ai"
+impact = 5
+effort_h = 4
+due = "2026-12-13"
+goal = "g_grow"
+after = ["p1_vps"]
+
+[[tasks]]
+key = "p3_radar"
+title = "GitHub skill radar: find, score, sandbox-test and log new tools weekly"
+phase = 3
+owner = "ai"
+impact = 5
+effort_h = 5
+due = "2026-12-20"
+goal = "g_grow"
+after = ["p3_sandbox", "p2_think"]
+
+[[tasks]]
+key = "p3_monitor"
+title = "Automatic resource checks (NAS space, subscriptions, budgets, free time)"
+phase = 3
+owner = "ai"
+impact = 4
+effort_h = 3
+due = "2026-12-20"
+goal = "g_hq"
+after = ["p3_connect"]
+
+# ---------------- Phase 4 · Act (Jan 2027 →) ----------------
+[[tasks]]
+key = "p4_budget"
+title = "Isolated account + virtual card with a small monthly cap; raise auto_spend_limit_eur"
+phase = 4
+owner = "me"
+impact = 5
+effort_h = 2
+due = "2027-01-10"
+goal = "g_grow"
+after = ["p2_review"]
+
+[[tasks]]
+key = "p4_packages"
+title = "Project packages: HQ turns top ideas into ready-to-execute plans (BOM, steps, budget, gates)"
+phase = 4
+owner = "ai"
+impact = 5
+effort_h = 5
+due = "2027-01-24"
+goal = "g_grow"
+after = ["p2_think"]
+
+[[tasks]]
+key = "p4_workstreams"
+title = "Parallel workstreams: one sub-agent per project, each with its own budget slice"
+phase = 4
+owner = "ai"
+impact = 5
+effort_h = 8
+due = "2027-02-14"
+goal = "g_grow"
+after = ["p4_packages", "p4_budget"]
+
+[[tasks]]
+key = "p4_dashboard"
+title = "Dashboard: resources, workstreams, approvals, log on one page"
+phase = 4
+owner = "ai"
+impact = 4
+effort_h = 4
+due = "2027-02-14"
+goal = "g_hq"
+after = ["p1_telegram"]
+
+[[ideas]]
+title = "Automate recurring Nerds IT tasks (tickets, NAS checks) with HQ skills"
+category = "work"
+impact = 4
+effort_h = 6
+confidence = 0.6
+
+[[ideas]]
+title = "HQ prepares DJ set ideas from new releases matched to my library"
+category = "creative"
+impact = 2
+effort_h = 4
+confidence = 0.5
+
+[[memories]]
+kind = "preference"
+content = "Djeddi prefers concise, academic wording; no hype or one-liners."
+tags = "style"
+
+[[memories]]
+kind = "decision"
+content = "HQ is a personal management system first, not a business. Business projects come later via gates: idea → test → build → scale."
+tags = "vision"
